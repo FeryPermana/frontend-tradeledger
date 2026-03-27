@@ -93,7 +93,7 @@ async function handleLogin() {
     toastService.success('Login successful')
 
     if (validPlans.includes(selectedPlan)) {
-      await router.push(`/payment?plan=${selectedPlan}`)
+      await router.push(`/dash/payment?plan=${selectedPlan}`)
       return
     }
 

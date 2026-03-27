@@ -180,7 +180,7 @@ function statusClass(status) {
 
 async function fetchPayments() {
     const res = await paymentApi.getMyPayments()
-    payments.value = res.data.data
+    payments.value = res.data
 }
 
 async function submit() {
