@@ -4,10 +4,14 @@
         <!-- Header -->
         <header class="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-950/85 backdrop-blur">
             <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
-                <RouterLink to="/" class="flex items-center gap-3">
+                <RouterLink to="/" class="flex items-center sm:items-center gap-3">
                     <img :src="logo" alt="TradeLedger Logo" class="h-10 w-auto object-contain" />
-                    <div>
-                        <div class="text-lg font-semibold tracking-tight text-white">TradeLedger</div>
+
+                    <div class="flex flex-col justify-center">
+                        <div class="hidden sm:block text-lg font-semibold tracking-tight text-white">
+                            TradeLedger
+                        </div>
+
                         <p class="text-xs text-slate-400">Track. Analyze. Grow.</p>
                     </div>
                 </RouterLink>
@@ -504,7 +508,7 @@
             </div>
         </footer>
     </div>
-    <FloatingWhatsApp/>
+    <FloatingWhatsApp />
 </template>
 
 <script setup>
