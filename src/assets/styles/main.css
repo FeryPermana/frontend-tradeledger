@@ -1,0 +1,297 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+
+  /* App */
+  --app-bg: #08111f;
+  --app-text: #e5e7eb;
+  --app-shell-bg: #060d18;
+  --app-shell-main-bg: #08111f;
+  --app-shell-text: #e5e7eb;
+
+  /* Generic text */
+  --text-title: #f8fafc;
+  --text-body: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-caption: #64748b;
+
+  /* Card / Surface */
+  --card-bg: #0f1b2d;
+  --card-border: #1f3147;
+
+  --surface-card-bg: #0f1b2d;
+  --surface-card-border: #1f3147;
+
+  --surface-soft-bg: #0b1627;
+  --surface-soft-border: #1b2a3f;
+
+  --surface-table-bg: #0f1b2d;
+  --surface-table-border: #1f3147;
+  --surface-table-head-bg: #0b1627;
+  --surface-table-head-text: #94a3b8;
+  --surface-table-row-border: rgba(31, 49, 71, 0.75);
+  --surface-table-row-hover: rgba(21, 35, 54, 0.9);
+
+  /* Header */
+  --header-bg: #0d1728;
+  --header-border: #1b2a3f;
+  --header-title: #f8fafc;
+  --header-btn-bg: #102038;
+  --header-btn-border: #22324a;
+  --header-btn-border-hover: #2f4664;
+  --header-btn-text: #e2e8f0;
+  --header-btn-text-hover: #ffffff;
+  --header-badge-bg: #102038;
+  --header-badge-border: #2a405b;
+  --header-badge-text: #cbd5e1;
+  --header-meta: #94a3b8;
+
+  /* Sidebar */
+  --sidebar-bg: #0d1728;
+  --sidebar-border: #1b2a3f;
+  --sidebar-muted: #94a3b8;
+  --sidebar-btn-bg: #102038;
+  --sidebar-btn-border: #22324a;
+  --sidebar-btn-border-hover: #2f4664;
+  --sidebar-btn-text: #94a3b8;
+  --sidebar-btn-text-hover: #ffffff;
+  --sidebar-link-text: #94a3b8;
+  --sidebar-link-hover-bg: #102038;
+  --sidebar-link-hover-text: #ffffff;
+  --sidebar-link-active-bg: #10263d;
+  --sidebar-link-active-text: #22d3ee;
+
+  /* Modal */
+  --modal-bg: #0f1b2d;
+  --modal-border: #1f3147;
+  --modal-title: #f8fafc;
+  --modal-close-bg: #102038;
+  --modal-close-border: #22324a;
+  --modal-close-text: #94a3b8;
+  --modal-close-hover-text: #ffffff;
+  --modal-preview-bg: #0b1627;
+  --modal-preview-border: #1b2a3f;
+  --modal-preview-label: #64748b;
+  --modal-preview-value: #f8fafc;
+
+  /* Buttons */
+  --button-primary-bg: #06b6d4;
+  --button-primary-hover: #22d3ee;
+  --button-primary-text: #ffffff;
+
+  --button-secondary-bg: #13233a;
+  --button-secondary-hover: #1b304b;
+  --button-secondary-border: #29405c;
+  --button-secondary-text: #f1f5f9;
+
+  --button-soft-bg: #13233a;
+  --button-soft-hover: #1b304b;
+  --button-soft-text: #e2e8f0;
+
+  --button-outline-bg: #0b1627;
+  --button-outline-border: #22324a;
+  --button-outline-text: #e2e8f0;
+
+  /* Inputs */
+  --input-bg: #13233a;
+  --input-border: #29405c;
+  --input-text: #f1f5f9;
+  --input-placeholder: #94a3b8;
+  --input-label: #cbd5e1;
+  --input-focus-border: #4b6380;
+  --input-focus-ring: rgba(75, 99, 128, 0.35);
+
+  /* Textarea */
+  --textarea-bg: #13233a;
+  --textarea-border: #29405c;
+  --textarea-toolbar-bg: rgba(11, 22, 39, 0.85);
+  --textarea-divider: #29405c;
+  --textarea-tool-color: #94a3b8;
+  --textarea-tool-hover-bg: #1b304b;
+  --textarea-tool-hover-color: #ffffff;
+  --textarea-meta: #64748b;
+  --textarea-footer-bg: rgba(11, 22, 39, 0.65);
+  --textarea-scrollbar: #29405c;
+
+  /* Asset helpers */
+  --watchlist-btn-bg: #0b1627;
+  --watchlist-btn-border: #22324a;
+  --open-chart-bg: #0b1627;
+  --open-chart-border: #22324a;
+  --open-chart-text: #e2e8f0;
+  --open-chart-hover-border: #2f4664;
+  --open-chart-hover-text: #ffffff;
+
+  /* Badge */
+  --badge-neutral-bg: #13233a;
+  --badge-neutral-border: #29405c;
+  --badge-neutral-text: #cbd5e1;
+
+  /* Progress */
+  --progress-bg: #1b2a3f;
+  --progress-fill: #38bdf8;
+
+  /* Alerts */
+  --alert-info-border: rgba(99, 102, 241, 0.25);
+  --alert-info-bg: rgba(99, 102, 241, 0.10);
+  --alert-info-text: #c7d2fe;
+  --alert-info-strong: #ffffff;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* App */
+  --app-bg: #f8fafc;
+  --app-text: #0f172a;
+  --app-shell-bg: #f8fafc;
+  --app-shell-main-bg: #f8fafc;
+  --app-shell-text: #0f172a;
+
+  /* Generic text */
+  --text-title: #0f172a;
+  --text-body: #334155;
+  --text-muted: #64748b;
+  --text-caption: #94a3b8;
+
+  /* Card / Surface */
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+
+  --surface-card-bg: #ffffff;
+  --surface-card-border: #e2e8f0;
+
+  --surface-soft-bg: #f8fafc;
+  --surface-soft-border: #e2e8f0;
+
+  --surface-table-bg: #ffffff;
+  --surface-table-border: #e2e8f0;
+  --surface-table-head-bg: #f8fafc;
+  --surface-table-head-text: #64748b;
+  --surface-table-row-border: #e2e8f0;
+  --surface-table-row-hover: #f8fafc;
+
+  /* Header */
+  --header-bg: #ffffff;
+  --header-border: #e2e8f0;
+  --header-title: #0f172a;
+  --header-btn-bg: #ffffff;
+  --header-btn-border: #cbd5e1;
+  --header-btn-border-hover: #94a3b8;
+  --header-btn-text: #334155;
+  --header-btn-text-hover: #0f172a;
+  --header-badge-bg: #f8fafc;
+  --header-badge-border: #cbd5e1;
+  --header-badge-text: #334155;
+  --header-meta: #64748b;
+
+  /* Sidebar */
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #e2e8f0;
+  --sidebar-muted: #64748b;
+  --sidebar-btn-bg: #ffffff;
+  --sidebar-btn-border: #cbd5e1;
+  --sidebar-btn-border-hover: #94a3b8;
+  --sidebar-btn-text: #64748b;
+  --sidebar-btn-text-hover: #0f172a;
+  --sidebar-link-text: #475569;
+  --sidebar-link-hover-bg: #f1f5f9;
+  --sidebar-link-hover-text: #0f172a;
+  --sidebar-link-active-bg: #e0f2fe;
+  --sidebar-link-active-text: #0891b2;
+
+  /* Modal */
+  --modal-bg: #ffffff;
+  --modal-border: #e2e8f0;
+  --modal-title: #0f172a;
+  --modal-close-bg: #ffffff;
+  --modal-close-border: #cbd5e1;
+  --modal-close-text: #64748b;
+  --modal-close-hover-text: #0f172a;
+  --modal-preview-bg: #f8fafc;
+  --modal-preview-border: #e2e8f0;
+  --modal-preview-label: #64748b;
+  --modal-preview-value: #0f172a;
+
+  /* Buttons */
+  --button-primary-bg: #0891b2;
+  --button-primary-hover: #0ea5e9;
+  --button-primary-text: #ffffff;
+
+  --button-secondary-bg: #ffffff;
+  --button-secondary-hover: #f8fafc;
+  --button-secondary-border: #cbd5e1;
+  --button-secondary-text: #0f172a;
+
+  --button-soft-bg: #f1f5f9;
+  --button-soft-hover: #e2e8f0;
+  --button-soft-text: #334155;
+
+  --button-outline-bg: #ffffff;
+  --button-outline-border: #cbd5e1;
+  --button-outline-text: #334155;
+
+  /* Inputs */
+  --input-bg: #ffffff;
+  --input-border: #cbd5e1;
+  --input-text: #0f172a;
+  --input-placeholder: #94a3b8;
+  --input-label: #334155;
+  --input-focus-border: #94a3b8;
+  --input-focus-ring: rgba(148, 163, 184, 0.35);
+
+  /* Textarea */
+  --textarea-bg: #ffffff;
+  --textarea-border: #cbd5e1;
+  --textarea-toolbar-bg: #f8fafc;
+  --textarea-divider: #e2e8f0;
+  --textarea-tool-color: #64748b;
+  --textarea-tool-hover-bg: #e2e8f0;
+  --textarea-tool-hover-color: #0f172a;
+  --textarea-meta: #64748b;
+  --textarea-footer-bg: #f8fafc;
+  --textarea-scrollbar: #cbd5e1;
+
+  /* Asset helpers */
+  --watchlist-btn-bg: #ffffff;
+  --watchlist-btn-border: #cbd5e1;
+  --open-chart-bg: #ffffff;
+  --open-chart-border: #cbd5e1;
+  --open-chart-text: #334155;
+  --open-chart-hover-border: #94a3b8;
+  --open-chart-hover-text: #0f172a;
+
+  /* Badge */
+  --badge-neutral-bg: #f8fafc;
+  --badge-neutral-border: #cbd5e1;
+  --badge-neutral-text: #475569;
+
+  /* Progress */
+  --progress-bg: #e2e8f0;
+  --progress-fill: #0ea5e9;
+
+  /* Alerts */
+  --alert-info-border: #c7d2fe;
+  --alert-info-bg: #eef2ff;
+  --alert-info-text: #4338ca;
+  --alert-info-strong: #0f172a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--app-bg);
+  color: var(--app-text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
