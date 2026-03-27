@@ -10,7 +10,7 @@
       </p>
     </div>
 
-    <nav class="space-y-1">
+    <nav class="flex-1 space-y-1">
       <RouterLink to="/dash/dashboard" class="menu-item" @click="$emit('navigate')">
         <LayoutDashboard class="icon" />
         Dashboard
@@ -51,10 +51,23 @@
         Settings
       </RouterLink>
     </nav>
+
+    <div class="mt-auto pt-4 border-t border-gray-100/10">
+      <a 
+        :href="whatsappUrl" 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        class="menu-item whatsapp-btn"
+      >
+        <MessageCircle class="icon text-emerald-500" />
+        <span>Chat Support</span>
+      </a>
+    </div>
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import logo from '@/assets/logo.png'
 import {
   LayoutDashboard,
@@ -65,9 +78,19 @@ import {
   CandlestickChart,
   BriefcaseBusiness,
   Settings,
+  MessageCircle,
 } from 'lucide-vue-next'
 
 defineEmits(['navigate'])
+
+const whatsappConfig = {
+  phone: '6285921939896',
+  text: 'Hai, saya mau tanya tentang TradeLedger.'
+}
+
+const whatsappUrl = computed(() => {
+  return `https://wa.me/${whatsappConfig.phone}?text=${encodeURIComponent(whatsappConfig.text)}`
+})
 </script>
 
 <style scoped>
@@ -84,6 +107,7 @@ defineEmits(['navigate'])
   color: var(--sidebar-link-text);
   font-size: 14px;
   transition: all 0.2s ease;
+  text-decoration: none; 
 }
 
 .menu-item:hover {
@@ -100,5 +124,9 @@ defineEmits(['navigate'])
   width: 18px;
   height: 18px;
   opacity: 0.8;
+}
+
+.whatsapp-btn:hover {
+  background: rgba(16, 185, 129, 0.1); 
 }
 </style>
