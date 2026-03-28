@@ -120,7 +120,7 @@
             </div>
 
             <!-- SUMMARY -->
-            <div v-if="!isEdit" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <div class="surface-soft rounded-2xl p-4">
                 <p class="page-subtitle text-sm">Account Equity</p>
                 <p class="page-title mt-2 text-lg font-semibold">
@@ -150,7 +150,7 @@
               </div>
             </div>
 
-            <div v-if="!isEdit" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               <div class="surface-soft rounded-2xl p-4">
                 <p class="page-subtitle text-sm">Risk Amount</p>
                 <p class="page-title mt-2 text-lg font-semibold">

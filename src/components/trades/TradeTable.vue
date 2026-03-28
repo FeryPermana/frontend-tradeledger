@@ -186,6 +186,8 @@ const props = defineProps({
 
 defineEmits(['view', 'edit', 'delete', 'sort'])
 
+const EPSILON = 0.00000001
+
 function getSortIcon(column) {
     if (props.sortBy !== column) return '~'
     return props.sortDirection === 'asc' ? '^' : 'v'
@@ -256,27 +258,33 @@ function getTotalQty(item) {
     return Number(item?.quantity || 0)
 }
 
+function isInvestmentCloseRecord(item) {
+    return item?.position_type === 'investment' && item?.status === 'closed'
+}
+
 function getRemainingQty(item) {
     if (isInvestmentCloseRecord(item)) {
         return 0
     }
 
-    if (item?.remaining_quantity !== undefined && item?.remaining_quantity !== null) {
-        return Number(item.remaining_quantity || 0)
-    }
+    const totalQty = getTotalQty(item)
+    const closedQty = getClosedQty(item)
 
-    const remaining = getTotalQty(item) - getClosedQty(item)
-    return remaining > 0 ? remaining : 0
+    const remaining = totalQty - closedQty
+    return remaining > EPSILON ? remaining : 0
 }
 
 function getDisplayStatus(item) {
     const status = item?.status
+    const totalQty = getTotalQty(item)
+    const closedQty = getClosedQty(item)
 
     if (isInvestmentCloseRecord(item)) return 'closed'
     if (status === 'closed') return 'closed'
-    if (getClosedQty(item) > 0 && getRemainingQty(item) > 0) return 'partial'
-    if (getClosedQty(item) >= getTotalQty(item) && getTotalQty(item) > 0) return 'closed'
-    return status || 'open'
+    if (closedQty >= totalQty - EPSILON && totalQty > 0) return 'closed'
+    if (closedQty > EPSILON && closedQty < totalQty - EPSILON) return 'partial'
+
+    return 'open'
 }
 
 function isGeneratedPartial(item) {
@@ -290,7 +298,7 @@ function isGeneratedPartial(item) {
         item?.position_type !== 'investment' &&
         isClosed &&
         closedQty > 0 &&
-        closedQty === totalQty &&
+        closedQty >= totalQty - EPSILON &&
         hasExit &&
         hasPnl &&
         typeof item?.notes === 'string' &&
@@ -298,18 +306,14 @@ function isGeneratedPartial(item) {
     )
 }
 
-function isInvestmentCloseRecord(item) {
-    return item?.position_type === 'investment' && item?.status === 'closed'
-}
-
 function showClosedInfo(item) {
     if (item?.position_type === 'investment') return false
-    return getClosedQty(item) > 0
+    return getClosedQty(item) > EPSILON
 }
 
 function showRemainingInfo(item) {
     if (item?.position_type === 'investment') return false
-    return getDisplayStatus(item) !== 'closed' && getRemainingQty(item) > 0
+    return getDisplayStatus(item) !== 'closed' && getRemainingQty(item) > EPSILON
 }
 
 function pnlDisplay(item) {

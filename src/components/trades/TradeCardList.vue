@@ -159,6 +159,8 @@ defineProps({
 
 defineEmits(['view', 'edit', 'delete'])
 
+const EPSILON = 0.00000001
+
 function formatDate(value) {
     if (!value) return '-'
     return new Date(value).toLocaleDateString('id-ID')
@@ -207,11 +209,15 @@ function statusBadgeClass(value) {
 }
 
 function getTotalQty(item) {
-    return Number(item.quantity || 0)
+    return Number(item?.quantity || 0)
 }
 
 function getClosedQty(item) {
-    return Number(item.closed_quantity || 0)
+    return Number(item?.closed_quantity || 0)
+}
+
+function isInvestmentCloseRecord(item) {
+    return item?.position_type === 'investment' && item?.status === 'closed'
 }
 
 function getRemainingQty(item) {
@@ -219,26 +225,24 @@ function getRemainingQty(item) {
         return 0
     }
 
-    if (item.remaining_quantity !== undefined && item.remaining_quantity !== null) {
-        return Number(item.remaining_quantity)
-    }
+    const total = getTotalQty(item)
+    const closed = getClosedQty(item)
+    const remaining = total - closed
 
-    return Math.max(0, getTotalQty(item) - getClosedQty(item))
+    return remaining > EPSILON ? remaining : 0
 }
 
 function getDisplayStatus(item) {
+    const status = item?.status
+    const totalQty = getTotalQty(item)
+    const closedQty = getClosedQty(item)
+
     if (isInvestmentCloseRecord(item)) return 'closed'
-    if (item.status === 'closed') return 'closed'
+    if (status === 'closed') return 'closed'
+    if (closedQty >= totalQty - EPSILON && totalQty > 0) return 'closed'
+    if (closedQty > EPSILON && closedQty < totalQty - EPSILON) return 'partial'
 
-    if (getClosedQty(item) > 0 && getRemainingQty(item) > 0) {
-        return 'partial'
-    }
-
-    if (getClosedQty(item) >= getTotalQty(item) && getTotalQty(item) > 0) {
-        return 'closed'
-    }
-
-    return item.status || 'open'
+    return 'open'
 }
 
 function pnlDisplay(item) {
@@ -270,10 +274,6 @@ function isGeneratedPartial(item) {
         typeof item.notes === 'string' &&
         item.notes.startsWith('Generated from partial close')
     )
-}
-
-function isInvestmentCloseRecord(item) {
-    return item?.position_type === 'investment' && item?.status === 'closed'
 }
 
 function canEdit(item) {
