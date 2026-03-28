@@ -9,13 +9,20 @@
                                 {{ item.asset?.symbol || '-' }}
                             </p>
 
-                            <span v-if="item.position_type === 'investment'"
-                                class="rounded-full border border-purple-500/20 bg-purple-500/10 px-2 py-0.5 text-[10px] text-purple-300">
+                            <span v-if="item.position_type === 'investment'" class="badge-purple">
                                 INVEST
+                            </span>
+
+                            <span v-if="isGeneratedPartial(item)" class="badge-amber">
+                                PARTIAL EXIT
+                            </span>
+
+                            <span v-if="isInvestmentCloseRecord(item)" class="badge-cyan">
+                                INVESTMENT SELL
                             </span>
                         </div>
 
-                        <p class="page-body mt-1 break-words text-sm">
+                        <p class="page-body mt-1 text-sm">
                             {{ item.strategy?.name || '-' }} • {{ formatPosition(item.position_type) }}
                         </p>
 
@@ -24,23 +31,15 @@
                         </p>
                     </div>
 
-                    <div class="shrink-0 text-right">
-                        <p class="text-sm font-semibold"
-                            :class="Number(item.profit_loss || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'">
-                            {{
-                                item.profit_loss !== null
-                                    ? displayMoney(
-                                        item.profit_loss,
-                                        item.account?.currency || item.display_currency || 'IDR'
-                                    )
-                            : '-'
-                            }}
+                    <div class="text-right">
+                        <p class="text-sm font-semibold" :class="pnlClass(item)">
+                            {{ pnlDisplay(item) }}
                         </p>
 
                         <div class="mt-2">
                             <span class="inline-flex rounded-full border px-2.5 py-1 text-xs font-medium"
-                                :class="statusBadgeClass(item.status)">
-                                {{ formatStatus(item.status) }}
+                                :class="statusBadgeClass(getDisplayStatus(item))">
+                                {{ formatStatus(getDisplayStatus(item)) }}
                             </span>
                         </div>
                     </div>
@@ -63,7 +62,7 @@
 
                     <div class="surface-soft rounded-xl p-3">
                         <p class="page-caption text-xs">Account</p>
-                        <p class="page-title mt-1 break-words text-sm font-medium">
+                        <p class="page-title mt-1 text-sm font-medium">
                             {{ item.account?.name || '-' }}
                         </p>
                     </div>
@@ -71,23 +70,48 @@
                     <div class="surface-soft rounded-xl p-3">
                         <p class="page-caption text-xs">R</p>
                         <p class="page-title mt-1 text-sm font-medium">
-                            {{ item.r_multiple !== null ? item.r_multiple : '-' }}
+                            {{ rDisplay(item) }}
                         </p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
+                <div v-if="isInvestmentCloseRecord(item)" class="grid grid-cols-1 gap-3">
                     <div class="surface-soft rounded-xl p-3">
-                        <p class="page-caption text-xs">Closed Qty</p>
+                        <p class="page-caption text-xs">Sold</p>
                         <p class="page-title mt-1 text-sm font-medium">
-                            {{ formatQty(item.closed_quantity ?? 0) }}
+                            {{ formatQty(getTotalQty(item)) }}
+                        </p>
+                    </div>
+                </div>
+
+                <div v-else-if="item.position_type === 'investment'" class="grid grid-cols-1 gap-3">
+                    <div class="surface-soft rounded-xl p-3">
+                        <p class="page-caption text-xs">Total</p>
+                        <p class="page-title mt-1 text-sm font-medium">
+                            {{ formatQty(getTotalQty(item)) }}
+                        </p>
+                    </div>
+                </div>
+
+                <div v-else class="grid grid-cols-3 gap-3">
+                    <div class="surface-soft rounded-xl p-3">
+                        <p class="page-caption text-xs">Total</p>
+                        <p class="page-title mt-1 text-sm font-medium">
+                            {{ formatQty(getTotalQty(item)) }}
                         </p>
                     </div>
 
                     <div class="surface-soft rounded-xl p-3">
-                        <p class="page-caption text-xs">Remaining Qty</p>
-                        <p class="page-title mt-1 text-sm font-medium">
-                            {{ formatQty(item.remaining_quantity ?? 0) }}
+                        <p class="page-caption text-xs">Closed</p>
+                        <p class="mt-1 text-sm font-medium text-amber-300">
+                            {{ formatQty(getClosedQty(item)) }}
+                        </p>
+                    </div>
+
+                    <div class="surface-soft rounded-xl p-3">
+                        <p class="page-caption text-xs">Remaining</p>
+                        <p class="mt-1 text-sm font-medium text-emerald-300">
+                            {{ formatQty(getRemainingQty(item)) }}
                         </p>
                     </div>
                 </div>
@@ -98,26 +122,28 @@
                     View
                 </button>
 
-                <button v-if="item.position_type !== 'investment'"
-                    class="btn-outline rounded-xl px-3 py-2 text-sm font-medium transition"
+                <button v-if="canEdit(item)" class="btn-outline rounded-xl px-3 py-2 text-sm font-medium"
                     @click="$emit('edit', item.id)">
-                    Edit
+                    Manage
                 </button>
 
-                <button
-                    class="rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm font-medium text-red-300 transition hover:bg-red-500/20"
-                    @click="$emit('delete', item.id)">
+                <button class="btn-danger rounded-xl px-3 py-2 text-sm font-medium" @click="$emit('delete', item.id)">
                     Delete
                 </button>
             </div>
 
-            <div v-if="item.position_type === 'investment'"
+            <div v-if="item.position_type === 'investment' && !isInvestmentCloseRecord(item)"
                 class="surface-soft page-subtitle mt-3 rounded-xl px-3 py-2 text-xs">
                 Investment positions are managed from Portfolio.
             </div>
+
+            <div v-if="isInvestmentCloseRecord(item)"
+                class="surface-soft page-subtitle mt-3 rounded-xl px-3 py-2 text-xs">
+                This is a realized sell record from Portfolio.
+            </div>
         </div>
 
-        <div v-if="!items.length" class="surface-card rounded-2xl p-6 text-center text-sm page-subtitle">
+        <div v-if="!items.length" class="surface-card rounded-2xl p-6 text-center page-subtitle">
             No trades found.
         </div>
     </div>
@@ -145,6 +171,11 @@ function formatNumber(value) {
     }).format(Number(value || 0))
 }
 
+function formatQty(value) {
+    if (value === null || value === undefined || value === '') return '-'
+    return Number(value)
+}
+
 function displayMoney(value, currency = 'IDR') {
     if (value === null || value === undefined || value === '') return '-'
 
@@ -155,12 +186,6 @@ function displayMoney(value, currency = 'IDR') {
     }).format(Number(value))
 }
 
-function formatQty(value) {
-    return new Intl.NumberFormat('id-ID', {
-        maximumFractionDigits: 8,
-    }).format(Number(value || 0))
-}
-
 function formatPosition(value) {
     if (value === 'intra_day') return 'Intra Day'
     if (!value) return '-'
@@ -168,27 +193,91 @@ function formatPosition(value) {
 }
 
 function formatStatus(value) {
-    if (!value) return 'Open'
     if (value === 'open') return 'Open'
     if (value === 'partial') return 'Partial'
     if (value === 'closed') return 'Closed'
-    return value
+    return value || 'Open'
 }
 
 function statusBadgeClass(value) {
-    if (value === 'open') {
-        return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-    }
-
-    if (value === 'partial') {
-        return 'border-amber-500/30 bg-amber-500/10 text-amber-300'
-    }
-
-    if (value === 'closed') {
-        return 'badge-neutral'
-    }
-
+    if (value === 'open') return 'badge-green'
+    if (value === 'partial') return 'badge-amber'
+    if (value === 'closed') return 'badge-neutral'
     return 'badge-neutral'
+}
+
+function getTotalQty(item) {
+    return Number(item.quantity || 0)
+}
+
+function getClosedQty(item) {
+    return Number(item.closed_quantity || 0)
+}
+
+function getRemainingQty(item) {
+    if (isInvestmentCloseRecord(item)) {
+        return 0
+    }
+
+    if (item.remaining_quantity !== undefined && item.remaining_quantity !== null) {
+        return Number(item.remaining_quantity)
+    }
+
+    return Math.max(0, getTotalQty(item) - getClosedQty(item))
+}
+
+function getDisplayStatus(item) {
+    if (isInvestmentCloseRecord(item)) return 'closed'
+    if (item.status === 'closed') return 'closed'
+
+    if (getClosedQty(item) > 0 && getRemainingQty(item) > 0) {
+        return 'partial'
+    }
+
+    if (getClosedQty(item) >= getTotalQty(item) && getTotalQty(item) > 0) {
+        return 'closed'
+    }
+
+    return item.status || 'open'
+}
+
+function pnlDisplay(item) {
+    if (item.profit_loss === null || item.profit_loss === undefined) return '-'
+
+    return displayMoney(
+        item.profit_loss,
+        item.account?.currency || item.display_currency || 'IDR'
+    )
+}
+
+function pnlClass(item) {
+    if (item.profit_loss === null || item.profit_loss === undefined) return 'page-subtitle'
+
+    return Number(item.profit_loss) >= 0
+        ? 'text-emerald-400'
+        : 'text-red-400'
+}
+
+function rDisplay(item) {
+    if (item.r_multiple === null || item.r_multiple === undefined) return '-'
+    return item.r_multiple
+}
+
+function isGeneratedPartial(item) {
+    return (
+        item.position_type !== 'investment' &&
+        item.status === 'closed' &&
+        typeof item.notes === 'string' &&
+        item.notes.startsWith('Generated from partial close')
+    )
+}
+
+function isInvestmentCloseRecord(item) {
+    return item?.position_type === 'investment' && item?.status === 'closed'
+}
+
+function canEdit(item) {
+    return item.position_type !== 'investment'
 }
 </script>
 
@@ -219,6 +308,36 @@ function statusBadgeClass(value) {
     color: var(--text-caption);
 }
 
+.badge-green {
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.1);
+    color: #6ee7b7;
+}
+
+.badge-amber {
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    background: rgba(251, 191, 36, 0.1);
+    color: #fcd34d;
+}
+
+.badge-purple {
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    background: rgba(168, 85, 247, 0.1);
+    color: #d8b4fe;
+}
+
+.badge-cyan {
+    border: 1px solid rgba(34, 211, 238, 0.3);
+    background: rgba(34, 211, 238, 0.1);
+    color: #67e8f9;
+}
+
+.badge-neutral {
+    border: 1px solid var(--badge-neutral-border);
+    background: var(--badge-neutral-bg);
+    color: var(--badge-neutral-text);
+}
+
 .btn-soft {
     background: var(--button-soft-bg);
     color: var(--button-soft-text);
@@ -239,9 +358,13 @@ function statusBadgeClass(value) {
     color: #22d3ee;
 }
 
-.badge-neutral {
-    border-color: var(--badge-neutral-border);
-    background: var(--badge-neutral-bg);
-    color: var(--badge-neutral-text);
+.btn-danger {
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+}
+
+.btn-danger:hover {
+    background: rgba(239, 68, 68, 0.2);
 }
 </style>

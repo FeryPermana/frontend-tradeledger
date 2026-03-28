@@ -42,6 +42,13 @@
               </div>
             </div>
 
+            <div v-if="isInvestmentCloseRecord" class="surface-soft rounded-2xl px-4 py-3 text-sm">
+              <p class="font-medium text-cyan-300">Investment Sell Record</p>
+              <p class="page-subtitle mt-1">
+                This record was generated from Portfolio as a realized investment sell transaction.
+              </p>
+            </div>
+
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <div class="space-y-1">
                 <label class="page-subtitle ml-1 text-sm font-medium">Entry Price</label>
@@ -58,16 +65,18 @@
               </div>
 
               <div class="space-y-1">
-                <label class="page-subtitle ml-1 text-sm font-medium">Quantity</label>
+                <label class="page-subtitle ml-1 text-sm font-medium">Fees</label>
                 <div class="field-box page-title break-words rounded-xl px-4 py-2.5">
-                  {{ trade?.quantity ?? '-' }}
+                  {{ displayMoney(trade?.fees) }}
                 </div>
               </div>
 
               <div class="space-y-1">
-                <label class="page-subtitle ml-1 text-sm font-medium">Fees</label>
-                <div class="field-box page-title break-words rounded-xl px-4 py-2.5">
-                  {{ displayMoney(trade?.fees) }}
+                <label class="page-subtitle ml-1 text-sm font-medium">Status</label>
+                <div class="field-box rounded-xl px-4 py-2.5">
+                  <span class="inline-flex rounded-full px-3 py-1 text-xs font-medium" :class="statusBadgeClass">
+                    {{ statusLabel }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -102,25 +111,49 @@
               </div>
             </div>
 
-            <div class="grid gap-4 xl:grid-cols-2">
-              <div>
-                <label class="page-subtitle mb-2 ml-1 block text-sm font-medium">Tags</label>
-                <div class="field-box flex min-h-[52px] flex-wrap gap-2 rounded-xl p-3">
-                  <span v-for="tag in trade?.tags || []" :key="tag.id" class="tag-pill rounded-lg px-3 py-1 text-sm">
-                    {{ tag.name }}
-                  </span>
-
-                  <p v-if="!trade?.tags?.length" class="page-caption text-sm italic">
-                    No tags
-                  </p>
-                </div>
+            <div v-if="isInvestmentCloseRecord" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
+              <div class="surface-soft rounded-2xl p-4 text-center">
+                <p class="page-subtitle text-xs uppercase tracking-wider">Sold Quantity</p>
+                <p class="page-title mt-2 break-words text-xl font-bold">
+                  {{ quantityDisplay }}
+                </p>
               </div>
 
-              <div>
-                <label class="page-subtitle mb-2 ml-1 block text-sm font-medium">Notes</label>
-                <div class="field-box page-body min-h-[52px] whitespace-pre-wrap rounded-xl p-3 text-sm">
-                  {{ trade?.notes || 'No notes available.' }}
-                </div>
+              <div class="surface-soft rounded-2xl p-4 text-center">
+                <p class="page-subtitle text-xs uppercase tracking-wider">Position State</p>
+                <p class="mt-2 text-xl font-bold text-red-400">
+                  Realized Sell
+                </p>
+              </div>
+            </div>
+
+            <div v-else class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <div class="surface-soft rounded-2xl p-4 text-center">
+                <p class="page-subtitle text-xs uppercase tracking-wider">Total Quantity</p>
+                <p class="page-title mt-2 break-words text-xl font-bold">
+                  {{ quantityDisplay }}
+                </p>
+              </div>
+
+              <div class="surface-soft rounded-2xl p-4 text-center">
+                <p class="page-subtitle text-xs uppercase tracking-wider">Closed Quantity</p>
+                <p class="page-title mt-2 break-words text-xl font-bold">
+                  {{ closedQuantityDisplay }}
+                </p>
+              </div>
+
+              <div class="surface-soft rounded-2xl p-4 text-center">
+                <p class="page-subtitle text-xs uppercase tracking-wider">Remaining Quantity</p>
+                <p class="page-title mt-2 break-words text-xl font-bold">
+                  {{ remainingQuantityDisplay }}
+                </p>
+              </div>
+
+              <div class="surface-soft rounded-2xl p-4 text-center">
+                <p class="page-subtitle text-xs uppercase tracking-wider">Position State</p>
+                <p class="mt-2 text-xl font-bold" :class="positionStateClass">
+                  {{ positionStateLabel }}
+                </p>
               </div>
             </div>
 
@@ -147,53 +180,25 @@
               </div>
             </div>
 
-            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <div class="space-y-1">
-                <label class="page-subtitle ml-1 text-sm font-medium">Status</label>
-                <div class="field-box page-title rounded-xl px-4 py-2.5 capitalize">
-                  {{ trade?.status || '-' }}
+            <div class="grid gap-4 xl:grid-cols-2">
+              <div>
+                <label class="page-subtitle mb-2 ml-1 block text-sm font-medium">Tags</label>
+                <div class="field-box flex min-h-[52px] flex-wrap gap-2 rounded-xl p-3">
+                  <span v-for="tag in trade?.tags || []" :key="tag.id" class="tag-pill rounded-lg px-3 py-1 text-sm">
+                    {{ tag.name }}
+                  </span>
+
+                  <p v-if="!trade?.tags?.length" class="page-caption text-sm italic">
+                    No tags
+                  </p>
                 </div>
               </div>
 
-              <div class="space-y-1">
-                <label class="page-subtitle ml-1 text-sm font-medium">Quantity</label>
-                <div class="field-box page-title rounded-xl px-4 py-2.5">
-                  {{ trade?.quantity ?? '-' }}
+              <div>
+                <label class="page-subtitle mb-2 ml-1 block text-sm font-medium">Notes</label>
+                <div class="field-box page-body min-h-[52px] whitespace-pre-wrap rounded-xl p-3 text-sm">
+                  {{ trade?.notes || 'No notes available.' }}
                 </div>
-              </div>
-
-              <div class="space-y-1">
-                <label class="page-subtitle ml-1 text-sm font-medium">Closed Quantity</label>
-                <div class="field-box page-title rounded-xl px-4 py-2.5">
-                  {{ trade?.closed_quantity ?? 0 }}
-                </div>
-              </div>
-
-              <div class="space-y-1">
-                <label class="page-subtitle ml-1 text-sm font-medium">Remaining Quantity</label>
-                <div class="field-box page-title rounded-xl px-4 py-2.5">
-                  {{ trade?.remaining_quantity ?? tradeRemainingQuantity }}
-                </div>
-              </div>
-            </div>
-
-            <div v-if="tradeImages.length" class="space-y-3">
-              <label class="page-subtitle ml-1 block text-sm font-medium">Images</label>
-
-              <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                <button v-for="image in tradeImages" :key="image.id" type="button"
-                  class="image-card overflow-hidden rounded-2xl text-left transition" @click="openZoom(image)">
-                  <img :src="getImageSrc(image)" alt="Trade image" class="h-44 w-full object-cover" />
-
-                  <div class="space-y-1 p-3">
-                    <p class="page-caption text-xs">
-                      {{ formatImageType(image.type) }}
-                    </p>
-                    <p class="image-card-text line-clamp-2 text-sm">
-                      {{ image.caption || 'No caption' }}
-                    </p>
-                  </div>
-                </button>
               </div>
             </div>
 
@@ -207,58 +212,13 @@
           </div>
         </div>
       </div>
-
-      <div v-if="zoomImage" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-4"
-        @click="closeZoom">
-        <div class="relative flex max-h-[90vh] w-full max-w-6xl flex-col items-center" @click.stop>
-          <div class="mb-3 flex flex-wrap items-center gap-2 self-end">
-            <button type="button" class="zoom-btn rounded-lg px-3 py-2 text-sm" @click="zoomOut">
-              −
-            </button>
-
-            <button type="button" class="zoom-btn rounded-lg px-3 py-2 text-sm" @click="resetZoom">
-              Reset
-            </button>
-
-            <button type="button" class="zoom-btn rounded-lg px-3 py-2 text-sm" @click="zoomIn">
-              +
-            </button>
-
-            <button type="button" class="zoom-close-btn rounded-lg px-3 py-2 text-sm" @click="closeZoom">
-              ✕
-            </button>
-          </div>
-
-          <div ref="panzoomWrapperRef"
-            class="flex h-[75vh] w-full items-center justify-center overflow-hidden rounded-2xl bg-black/40 p-4 touch-none">
-            <img ref="panzoomImageRef" :src="getImageSrc(zoomImage)" alt="Zoomed trade image"
-              class="max-h-[70vh] max-w-full rounded-2xl object-contain select-none" draggable="false" />
-          </div>
-
-          <div class="zoom-caption mt-3 rounded-xl p-3">
-            <div class="page-subtitle mb-1 text-xs">
-              {{ formatImageType(zoomImage.type) }}
-            </div>
-            <div class="zoom-caption-text text-sm">
-              {{ zoomImage.caption || 'No caption' }}
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, nextTick, onBeforeUnmount } from 'vue'
-import Panzoom from '@panzoom/panzoom'
+import { computed } from 'vue'
 import { formatCurrency } from '@/utils/formatters'
-
-const zoomImage = ref(null)
-const panzoomImageRef = ref(null)
-const panzoomWrapperRef = ref(null)
-
-let panzoomInstance = null
 
 const props = defineProps({
   open: { type: Boolean, default: false },
@@ -268,7 +228,10 @@ const props = defineProps({
 defineEmits(['close'])
 
 const tradeCurrency = computed(() => props.trade?.account?.currency || 'USD')
-const tradeImages = computed(() => props.trade?.images || [])
+
+const isInvestmentCloseRecord = computed(() => {
+  return props.trade?.position_type === 'investment' && props.trade?.status === 'closed'
+})
 
 const assetDisplay = computed(() => {
   const symbol = props.trade?.asset?.symbol
@@ -285,6 +248,49 @@ const positionTypeDisplay = computed(() => {
   if (!value) return '-'
   if (value === 'intra_day') return 'Intra Day'
   return value.charAt(0).toUpperCase() + value.slice(1)
+})
+
+const quantityValue = computed(() => Number(props.trade?.quantity || 0))
+const closedQuantityValue = computed(() => Number(props.trade?.closed_quantity || 0))
+const remainingQuantityValue = computed(() => {
+  if (isInvestmentCloseRecord.value) return 0
+
+  if (props.trade?.remaining_quantity !== undefined && props.trade?.remaining_quantity !== null) {
+    return Number(props.trade.remaining_quantity || 0)
+  }
+
+  const remaining = quantityValue.value - closedQuantityValue.value
+  return remaining > 0 ? remaining : 0
+})
+
+const quantityDisplay = computed(() => formatNumber(quantityValue.value))
+const closedQuantityDisplay = computed(() => formatNumber(closedQuantityValue.value))
+const remainingQuantityDisplay = computed(() => formatNumber(remainingQuantityValue.value))
+
+const statusLabel = computed(() => {
+  if (isInvestmentCloseRecord.value) return 'Closed'
+  if (props.trade?.status === 'closed') return 'Closed'
+  if (closedQuantityValue.value > 0 && remainingQuantityValue.value > 0) return 'Partial'
+  return props.trade?.status ? capitalize(props.trade.status) : '-'
+})
+
+const statusBadgeClass = computed(() => {
+  if (isInvestmentCloseRecord.value) return 'bg-red-500/10 text-red-400'
+  if (props.trade?.status === 'closed') return 'bg-red-500/10 text-red-400'
+  if (closedQuantityValue.value > 0 && remainingQuantityValue.value > 0) return 'bg-amber-500/10 text-amber-400'
+  return 'bg-emerald-500/10 text-emerald-400'
+})
+
+const positionStateLabel = computed(() => {
+  if (props.trade?.status === 'closed') return 'Fully Closed'
+  if (closedQuantityValue.value > 0 && remainingQuantityValue.value > 0) return 'Partially Closed'
+  return 'Still Open'
+})
+
+const positionStateClass = computed(() => {
+  if (props.trade?.status === 'closed') return 'text-red-400'
+  if (closedQuantityValue.value > 0 && remainingQuantityValue.value > 0) return 'text-amber-400'
+  return 'text-green-400'
 })
 
 const riskAmount = computed(() => {
@@ -306,6 +312,7 @@ const profitLossDisplay = computed(() => {
   if (props.trade?.profit_loss === null || props.trade?.profit_loss === undefined) {
     return '-'
   }
+
   return formatCurrency(props.trade.profit_loss, tradeCurrency.value)
 })
 
@@ -313,6 +320,7 @@ const profitLossClass = computed(() => {
   if (props.trade?.profit_loss === null || props.trade?.profit_loss === undefined) {
     return 'page-body'
   }
+
   return profitLossValue.value >= 0 ? 'text-green-400' : 'text-red-400'
 })
 
@@ -320,18 +328,12 @@ const rMultipleDisplay = computed(() => {
   if (props.trade?.r_multiple === null || props.trade?.r_multiple === undefined) {
     return '-'
   }
+
   return props.trade.r_multiple
 })
 
 const riskAmountDisplay = computed(() => {
   return formatCurrency(riskAmount.value, tradeCurrency.value)
-})
-
-const tradeRemainingQuantity = computed(() => {
-  const quantity = Number(props.trade?.quantity || 0)
-  const closed = Number(props.trade?.closed_quantity || 0)
-  const remaining = quantity - closed
-  return remaining > 0 ? remaining : 0
 })
 
 function displayMoney(value) {
@@ -355,89 +357,15 @@ function formatDate(dateString) {
   })
 }
 
-function getImageSrc(image) {
-  return image.image_url || image.image_path
+function formatNumber(value) {
+  if (value === null || value === undefined || value === '') return '-'
+  return Number(value)
 }
 
-function formatImageType(type) {
-  if (!type) return 'General'
-
-  const map = {
-    entry: 'Entry',
-    exit: 'Exit',
-    setup: 'Setup',
-  }
-
-  return map[type] || type
+function capitalize(value) {
+  if (!value) return '-'
+  return value.charAt(0).toUpperCase() + value.slice(1)
 }
-
-async function openZoom(image) {
-  zoomImage.value = image
-
-  await nextTick()
-
-  if (panzoomInstance) {
-    panzoomInstance.destroy()
-    panzoomInstance = null
-  }
-
-  if (panzoomImageRef.value && panzoomWrapperRef.value) {
-    panzoomInstance = Panzoom(panzoomImageRef.value, {
-      maxScale: 4,
-      minScale: 1,
-      contain: 'outside',
-      cursor: 'grab',
-    })
-
-    panzoomWrapperRef.value.addEventListener(
-      'wheel',
-      panzoomInstance.zoomWithWheel,
-      { passive: false }
-    )
-  }
-}
-
-function closeZoom() {
-  if (panzoomInstance && panzoomWrapperRef.value) {
-    panzoomWrapperRef.value.removeEventListener(
-      'wheel',
-      panzoomInstance.zoomWithWheel
-    )
-    panzoomInstance.destroy()
-    panzoomInstance = null
-  }
-
-  zoomImage.value = null
-}
-
-function zoomIn() {
-  if (panzoomInstance) {
-    panzoomInstance.zoomIn()
-  }
-}
-
-function zoomOut() {
-  if (panzoomInstance) {
-    panzoomInstance.zoomOut()
-  }
-}
-
-function resetZoom() {
-  if (panzoomInstance) {
-    panzoomInstance.reset()
-  }
-}
-
-onBeforeUnmount(() => {
-  if (panzoomInstance && panzoomWrapperRef.value) {
-    panzoomWrapperRef.value.removeEventListener(
-      'wheel',
-      panzoomInstance.zoomWithWheel
-    )
-    panzoomInstance.destroy()
-    panzoomInstance = null
-  }
-})
 </script>
 
 <style scoped>
@@ -480,19 +408,6 @@ onBeforeUnmount(() => {
   color: var(--text-body);
 }
 
-.image-card {
-  border: 1px solid var(--surface-card-border);
-  background: var(--surface-card-bg);
-}
-
-.image-card:hover {
-  border-color: var(--header-btn-border-hover);
-}
-
-.image-card-text {
-  color: var(--text-body);
-}
-
 .btn-soft {
   background: var(--button-soft-bg);
   color: var(--button-soft-text);
@@ -516,31 +431,5 @@ onBeforeUnmount(() => {
 
 .page-caption {
   color: var(--text-caption);
-}
-
-.zoom-btn {
-  background: var(--button-soft-bg);
-  color: var(--button-soft-text);
-}
-
-.zoom-btn:hover {
-  background: var(--button-soft-hover);
-}
-
-.zoom-close-btn {
-  background: rgba(0, 0, 0, 0.6);
-  color: #ffffff;
-}
-
-.zoom-close-btn:hover {
-  background: rgba(0, 0, 0, 0.8);
-}
-
-.zoom-caption {
-  background: rgba(15, 23, 42, 0.9);
-}
-
-.zoom-caption-text {
-  color: #e2e8f0;
 }
 </style>

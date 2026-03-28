@@ -6,7 +6,7 @@
         <!-- HEADER -->
         <div class="modal-header flex items-center justify-between px-5 py-4 sm:px-6">
           <h3 class="modal-title text-lg font-semibold sm:text-xl">
-            {{ isEdit ? 'Edit Trade' : 'Create Trade' }}
+            {{ isEdit ? 'Manage Trade' : 'Open Trade' }}
           </h3>
 
           <button type="button" class="modal-close rounded-xl px-3 py-2 text-sm transition" @click="$emit('close')">
@@ -16,13 +16,15 @@
 
         <!-- BODY -->
         <div class="modal-body overflow-y-auto px-5 py-5 sm:px-6">
-          <p v-if="!isInvestment && !isClosedTrade && selectedAssetCategory === 'stock'"
-                  class="field-helper text-xs">
-                  For stocks, quantity uses lots. 1 lot = 100 shares.
-                </p>
+
+          <!-- HELPER -->
+          <p v-if="!isInvestment && !isClosedTrade && selectedAssetCategory === 'stock'" class="field-helper text-xs">
+            For stocks, quantity uses lots. 1 lot = 100 shares.
+          </p>
+
           <form class="space-y-6" @submit.prevent="handleSubmit">
 
-            <!-- SELECT -->
+            <!-- BASIC -->
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <BaseSelect v-model="form.account_id" label="Account *" :options="accountOptions"
                 :error="errors.account_id" :disabled="isEdit" />
@@ -37,62 +39,88 @@
                 :error="errors.position_type" :disabled="isEdit" />
             </div>
 
-            <!-- ALERT -->
+            <!-- INVESTMENT ALERT -->
             <div v-if="isInvestment" class="alert-warning rounded-2xl px-4 py-3 text-sm">
               <p class="font-medium">Investment Position</p>
-              <p class="mt-1">Investment mode only keeps required fields.</p>
+              <p class="mt-1">This mode only keeps essential fields.</p>
             </div>
 
-            <!-- INPUT -->
+            <!-- PRICE / QTY -->
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-              <BaseInput v-model="form.entry_price" label="Entry Price *" type="number" :error="errors.entry_price" placeholder="Use dot (.) for decimals. Do not use thousand separators."/>
 
-              <BaseInput v-if="!isInvestment" v-model="form.exit_price" label="Exit Price" type="number" placeholder="Use dot (.) for decimals. Do not use thousand separators."
-                :error="errors.exit_price" />
+              <BaseInput v-model="form.entry_price" label="Entry Price *" type="number" :error="errors.entry_price" placeholder="1234.56"
+                :disabled="isEdit" />
 
+              <!-- EXIT (ONLY WHEN CLOSING) -->
+              <BaseInput v-if="isEdit && !isInvestment && closedQuantityNum > 0" v-model="form.exit_price"
+                label="Exit Price" type="number" :error="errors.exit_price" placeholder="1234.56" />
+
+              <!-- QUANTITY -->
               <div class="space-y-2">
-                <BaseInput v-model="form.quantity" label="Quantity *" type="number" :error="errors.quantity" placeholder="Use dot (.) for decimals. Do not use thousand separators."
-                  :disabled="isEdit" />
+                <BaseInput v-model="form.quantity" label="Quantity *" type="number" :error="errors.quantity"
+                  :disabled="isEdit" placeholder="1234.56" :readonly="isEdit" />
+
+                <p v-if="isEdit && !isInvestment" class="field-helper text-xs">
+                  Original quantity: {{ displayOriginalQuantity }} (read-only)
+                </p>
               </div>
 
-              <BaseInput v-if="!isInvestment && !isClosedTrade" v-model="form.partial_close" label="Partial Close"
-                type="number" :error="errors.partial_close" placeholder="Use dot (.) for decimals. Do not use thousand separators." />
+              <!-- CLOSED QUANTITY -->
+              <div v-if="isEdit && !isInvestment && !isClosedTrade" class="space-y-2">
+                <BaseInput v-model="form.closed_quantity" label="Closed Quantity" type="number"
+                  :error="errors.closed_quantity" placeholder="1234.56" />
 
-              <BaseInput v-if="!isInvestment" v-model="form.fees" label="Fees" type="number" :error="errors.fees" placeholder="Use dot (.) for decimals. Do not use thousand separators." />
+                <div class="flex items-center justify-between">
+                  <p class="field-helper text-xs">
+                    Remaining: {{ displayRemainingQuantity }}
+                  </p>
+
+                  <button type="button" class="text-xs text-cyan-400 hover:underline" @click="fillCloseAll">
+                    Close All
+                  </button>
+                </div>
+              </div>
+
+              <BaseInput v-if="!isInvestment" v-model="form.fees" label="Fees" type="number" :error="errors.fees" placeholder="1234.56" />
             </div>
 
-            <!-- SL TP -->
+            <!-- SL / TP / DATE -->
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <BaseInput v-if="!isInvestment" v-model="form.stop_loss" label="Stop Loss" type="number" placeholder="Use dot (.) for decimals. Do not use thousand separators."/>
 
-              <BaseInput v-if="!isInvestment" v-model="form.take_profit" label="Take Profit" type="number" placeholder="Use dot (.) for decimals. Do not use thousand separators."/>
+              <BaseInput v-if="!isInvestment" v-model="form.stop_loss" label="Stop Loss" type="number"
+                :error="errors.stop_loss" placeholder="1234.56" />
 
-              <BaseInput v-model="form.entry_date" label="Entry Date *" type="datetime-local"
-                :error="errors.entry_date" />
+              <BaseInput v-if="!isInvestment" v-model="form.take_profit" label="Take Profit" type="number"
+                :error="errors.take_profit" placeholder="1234.56"/>
 
-              <BaseInput v-if="!isInvestment" v-model="form.exit_date" label="Exit Date" type="datetime-local"
-                :error="errors.exit_date" />
+              <BaseInput v-model="form.entry_date" label="Entry Date *" type="datetime-local" :error="errors.entry_date"
+                :disabled="isEdit" />
+
+              <BaseInput v-if="isEdit && !isInvestment && closedQuantityNum > 0" v-model="form.exit_date"
+                label="Exit Date *" type="datetime-local" :error="errors.exit_date" />
             </div>
 
-            <!-- TAGS + NOTES -->
-            <div v-if="!isInvestment" class="grid gap-4 xl:grid-cols-2">
-              <div>
-                <label class="page-subtitle mb-2 block text-sm font-medium">Tags</label>
+            <!-- TAGS & NOTES -->
+            <div class="grid gap-4 xl:grid-cols-2">
+
+              <div v-if="!isInvestment">
+                <label class="page-subtitle mb-2 block text-sm">Tags</label>
 
                 <div class="surface-soft grid max-h-52 gap-2 overflow-y-auto rounded-xl p-3 sm:grid-cols-2">
                   <label v-for="tag in tagStore.items" :key="tag.id"
-                    class="tag-pill flex items-center gap-2 rounded-lg px-3 py-2 text-sm">
+                    class="tag-pill flex items-center gap-2 px-3 py-2 text-sm">
                     <input v-model="form.tag_ids" type="checkbox" :value="tag.id" />
                     <span class="truncate">{{ tag.name }}</span>
                   </label>
                 </div>
               </div>
 
-              <BaseTextarea v-model="form.notes" label="Notes" placeholder="Write your trade note..." />
+              <BaseTextarea v-if="!isInvestment" v-model="form.notes" label="Notes"
+                placeholder="Write your trade note..." :error="errors.notes" />
             </div>
 
-            <!-- STATS -->
-            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <!-- SUMMARY -->
+            <div v-if="!isEdit" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <div class="surface-soft rounded-2xl p-4">
                 <p class="page-subtitle text-sm">Account Equity</p>
                 <p class="page-title mt-2 text-lg font-semibold">
@@ -122,8 +150,7 @@
               </div>
             </div>
 
-            <!-- RESULT -->
-            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <div v-if="!isEdit" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               <div class="surface-soft rounded-2xl p-4">
                 <p class="page-subtitle text-sm">Risk Amount</p>
                 <p class="page-title mt-2 text-lg font-semibold">
@@ -152,13 +179,13 @@
             </div>
 
             <!-- ACTION -->
-            <div class="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
-              <BaseButton variant="secondary" class="w-full sm:w-auto" @click="$emit('close')">
+            <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <BaseButton variant="secondary" @click="$emit('close')">
                 Cancel
               </BaseButton>
 
-              <BaseButton type="submit" class="w-full sm:w-auto" :loading="loading">
-                {{ isEdit ? 'Update Trade' : 'Save Trade' }}
+              <BaseButton type="submit" :loading="loading">
+                {{ isEdit ? 'Manage Trade' : 'Open Trade' }}
               </BaseButton>
             </div>
 
@@ -221,7 +248,7 @@ const form = reactive({
   entry_price: '',
   exit_price: '',
   quantity: '',
-  partial_close: '',
+  closed_quantity: '',
   stop_loss: '',
   take_profit: '',
   fees: '',
@@ -239,7 +266,7 @@ const errors = reactive({
   entry_price: '',
   exit_price: '',
   quantity: '',
-  partial_close: '',
+  closed_quantity: '',
   stop_loss: '',
   take_profit: '',
   fees: '',
@@ -288,17 +315,30 @@ const selectedAccountCurrency = computed(() =>
   selectedAccount.value?.currency || 'USD'
 )
 
+const selectedAsset = computed(() =>
+  assetStore.items.find((item) => String(item.id) === String(form.asset_id))
+)
+
+const selectedAssetCategory = computed(() =>
+  selectedAsset.value?.category || ''
+)
+
 const entryPriceNum = computed(() => Number(form.entry_price || 0))
 const exitPriceNum = computed(() => Number(form.exit_price || 0))
 const quantityNum = computed(() => Number(form.quantity || 0))
-const partialCloseNum = computed(() => Number(form.partial_close || 0))
+const closedQuantityNum = computed(() => Number(form.closed_quantity || 0))
 const stopLossNum = computed(() => Number(form.stop_loss || 0))
 const feesNum = computed(() => Number(form.fees || 0))
 const existingClosedQuantityNum = computed(() => Number(props.trade?.closed_quantity || 0))
+const originalTradeQuantityNum = computed(() => Number(props.trade?.quantity || 0))
 
 const currentRemainingQuantity = computed(() => {
-  return Math.max(0, quantityNum.value - existingClosedQuantityNum.value)
+  if (!isEdit.value) return quantityNum.value
+  return Math.max(0, originalTradeQuantityNum.value - existingClosedQuantityNum.value)
 })
+
+const displayOriginalQuantity = computed(() => formatNumberForInput(originalTradeQuantityNum.value))
+const displayRemainingQuantity = computed(() => formatNumberForInput(currentRemainingQuantity.value))
 
 const positionValue = computed(() => {
   const baseFees = isInvestment.value ? 0 : feesNum.value
@@ -317,15 +357,9 @@ const positionValueExceedsEquity = computed(() => {
 })
 
 const previewCloseQuantity = computed(() => {
-  if (isInvestment.value) {
-    return quantityNum.value
-  }
-
-  if (!isEdit.value) {
-    return partialCloseNum.value > 0 ? partialCloseNum.value : quantityNum.value
-  }
-
-  return partialCloseNum.value > 0 ? partialCloseNum.value : 0
+  if (isInvestment.value) return quantityNum.value
+  if (isEdit.value) return closedQuantityNum.value > 0 ? closedQuantityNum.value : 0
+  return quantityNum.value
 })
 
 const riskAmount = computed(() => {
@@ -380,18 +414,11 @@ const rPreviewDisplay = computed(() =>
 const insufficientCash = computed(() => {
   if (!form.account_id) return false
   if (!accountBalanceInfo.value) return false
+  if (isEdit.value && closedQuantityNum.value > 0) return false
   if (!isInvestment.value && form.exit_date) return false
 
   return requiredCash.value > Number(accountBalanceInfo.value?.available_balance || 0)
 })
-
-const selectedAsset = computed(() =>
-  assetStore.items.find((item) => String(item.id) === String(form.asset_id))
-)
-
-const selectedAssetCategory = computed(() =>
-  selectedAsset.value?.category || ''
-)
 
 onMounted(async () => {
   if (!accountStore.items.length) await accountStore.getAll()
@@ -425,7 +452,7 @@ watch(
     if (value === 'investment') {
       form.strategy_id = ''
       form.exit_price = ''
-      form.partial_close = ''
+      form.closed_quantity = ''
       form.fees = ''
       form.stop_loss = ''
       form.take_profit = ''
@@ -475,7 +502,7 @@ function resetForm() {
   form.exit_date = toDateTimeLocal(props.trade?.exit_date)
   form.notes = props.trade?.notes ?? ''
   form.tag_ids = props.trade?.tags?.map((tag) => tag.id) ?? []
-  form.partial_close = ''
+  form.closed_quantity = ''
 
   if (form.position_type === 'investment' && !form.notes) {
     form.notes = 'Investment Entry'
@@ -490,7 +517,7 @@ function resetErrors() {
   errors.entry_price = ''
   errors.exit_price = ''
   errors.quantity = ''
-  errors.partial_close = ''
+  errors.closed_quantity = ''
   errors.stop_loss = ''
   errors.take_profit = ''
   errors.fees = ''
@@ -499,12 +526,16 @@ function resetErrors() {
   errors.notes = ''
 }
 
+function fillCloseAll() {
+  form.closed_quantity = currentRemainingQuantity.value
+}
+
 function handleUpgradeRequired(error) {
   const response = error.response?.data
 
   if (response?.upgrade_required) {
     toastService.error(
-      response.message?.id || 'Upgrade ke Pro diperlukan untuk menambah trade.'
+      response.message?.id || 'Upgrade to Pro is required to add more trades.'
     )
 
     emit('close')
@@ -525,13 +556,17 @@ async function handleSubmit() {
   if (!form.quantity) errors.quantity = 'Quantity is required.'
   if (!form.entry_date) errors.entry_date = 'Entry date is required.'
 
-  if (!isInvestment.value && partialCloseNum.value > currentRemainingQuantity.value) {
-    errors.partial_close = 'Partial close cannot be greater than remaining quantity.'
+  if (isEdit.value && !isInvestment.value && closedQuantityNum.value > currentRemainingQuantity.value) {
+    errors.closed_quantity = 'Closed quantity cannot be greater than remaining quantity.'
   }
 
-  if (!isInvestment.value && partialCloseNum.value > 0) {
-    if (!form.exit_price) errors.exit_price = 'Exit price is required for partial close.'
-    if (!form.exit_date) errors.exit_date = 'Exit date is required for partial close.'
+  if (isEdit.value && !isInvestment.value && closedQuantityNum.value > 0) {
+    if (!form.exit_price) errors.exit_price = 'Exit price is required when closing a position.'
+    if (!form.exit_date) errors.exit_date = 'Exit date is required when closing a position.'
+  }
+
+  if (!isEdit.value && closedQuantityNum.value > 0) {
+    errors.closed_quantity = 'Closed quantity is only available when managing a trade.'
   }
 
   if (!isInvestment.value && form.exit_date && form.entry_date && new Date(form.exit_date) < new Date(form.entry_date)) {
@@ -553,7 +588,7 @@ async function handleSubmit() {
     errors.position_type ||
     errors.entry_price ||
     errors.quantity ||
-    errors.partial_close ||
+    errors.closed_quantity ||
     errors.exit_price ||
     errors.entry_date ||
     errors.exit_date
@@ -563,7 +598,7 @@ async function handleSubmit() {
   }
 
   loading.value = true
-  const toastId = toastService.loading(isEdit.value ? 'Updating trade...' : 'Saving trade...')
+  const toastId = toastService.loading(isEdit.value ? 'Managing trade...' : 'Opening trade...')
 
   const payload = {
     account_id: Number(form.account_id),
@@ -573,7 +608,11 @@ async function handleSubmit() {
     entry_price: Number(form.entry_price),
     exit_price: isInvestment.value || form.exit_price === '' ? null : Number(form.exit_price),
     quantity: Number(form.quantity),
-    closed_quantity: isInvestment.value ? 0 : (form.partial_close === '' ? 0 : Number(form.partial_close)),
+    closed_quantity: isInvestment.value
+      ? 0
+      : isEdit.value
+        ? (form.closed_quantity === '' ? 0 : Number(form.closed_quantity))
+        : 0,
     stop_loss: isInvestment.value || form.stop_loss === '' ? null : Number(form.stop_loss),
     take_profit: isInvestment.value || form.take_profit === '' ? null : Number(form.take_profit),
     fees: isInvestment.value || form.fees === '' ? 0 : Number(form.fees),
@@ -587,11 +626,20 @@ async function handleSubmit() {
     if (isEdit.value) {
       await tradeStore.update(props.trade.id, payload)
       toastService.dismiss(toastId)
-      toastService.success('Trade updated successfully.')
+
+      if (closedQuantityNum.value > 0) {
+        if (closedQuantityNum.value >= currentRemainingQuantity.value) {
+          toastService.success('Position fully closed.')
+        } else {
+          toastService.success('Position partially closed.')
+        }
+      } else {
+        toastService.success('Trade updated successfully.')
+      }
     } else {
       await tradeStore.create(payload)
       toastService.dismiss(toastId)
-      toastService.success('Trade created successfully.')
+      toastService.success('Trade opened successfully.')
     }
 
     emit('saved')
@@ -612,7 +660,7 @@ async function handleSubmit() {
       errors.entry_price = response.errors.entry_price?.[0] || ''
       errors.exit_price = response.errors.exit_price?.[0] || ''
       errors.quantity = response.errors.quantity?.[0] || ''
-      errors.partial_close = response.errors.closed_quantity?.[0] || response.errors.partial_close?.[0] || ''
+      errors.closed_quantity = response.errors.closed_quantity?.[0] || ''
       errors.stop_loss = response.errors.stop_loss?.[0] || ''
       errors.take_profit = response.errors.take_profit?.[0] || ''
       errors.fees = response.errors.fees?.[0] || ''

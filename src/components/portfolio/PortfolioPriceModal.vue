@@ -30,7 +30,7 @@
                             <p class="page-body mb-3 text-sm font-medium">Edit Price</p>
 
                             <BaseInput v-model="form.current_price" label="Current Price" type="number"
-                                placeholder="Use dot (.) for decimals. Do not use thousand separators." />
+                                placeholder="1234.56" />
                         </div>
 
                         <div class="warning-soft rounded-2xl p-4">
@@ -48,12 +48,12 @@
 
                             <div class="grid gap-4 md:grid-cols-2">
                                 <BaseInput v-model="form.close_quantity" label="Close Quantity (Shares)" type="number"
-                                    placeholder="Use dot (.) for decimals. Do not use thousand separators." :error="errors.close_quantity" />
+                                    placeholder="1234.56" :error="errors.close_quantity" />
 
                                 <BaseInput v-model="form.close_price" label="Exit Price" type="number"
-                                    placeholder="Use dot (.) for decimals. Do not use thousand separators." :error="errors.close_price" />
+                                    placeholder="1234.56" :error="errors.close_price" />
 
-                                <BaseInput v-model="form.close_fee" label="Sell Fee" type="number" placeholder="Use dot (.) for decimals. Do not use thousand separators."
+                                <BaseInput v-model="form.close_fee" label="Sell Fee" type="number" placeholder="1234.56"
                                     :error="errors.close_fee" />
 
                                 <BaseInput v-model="form.close_date" label="Exit Date" type="datetime-local"

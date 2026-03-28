@@ -5,7 +5,7 @@
         </label>
 
         <div class="relative flex items-center">
-            <input :id="id" :type="type" :value="modelValue" :placeholder="placeholder" :autocomplete="autocomplete"
+            <input :id="id" :type="type" :value="modelValue" :readonly="readonly" :placeholder="placeholder" :autocomplete="autocomplete"
                 :min="type === 'number' ? '0' : null" :step="type === 'number' ? 'any' : null"
                 class="base-input w-full rounded-xl px-4 py-3 text-sm outline-none transition"
                 :class="{ 'pr-12': $slots.suffix }" @input="handleInput" @keydown="handleKeyDown" />
@@ -50,6 +50,10 @@ const props = defineProps({
     error: {
         type: String,
         default: '',
+    },
+    readonly: { 
+        type: Boolean,
+        default: false,
     },
 })
 

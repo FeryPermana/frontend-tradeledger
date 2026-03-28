@@ -1,7 +1,7 @@
 <template>
     <div class="surface-table overflow-hidden rounded-2xl shadow-xl">
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[1100px] text-sm">
+            <table class="w-full min-w-[1180px] text-sm">
                 <thead class="surface-table-head">
                     <tr>
                         <th class="p-4 text-left">
@@ -17,6 +17,7 @@
                         <th class="p-4 text-left">Strategy</th>
                         <th class="p-4 text-left">Position</th>
                         <th class="p-4 text-left">Entry</th>
+                        <th class="p-4 text-left">Qty</th>
                         <th class="p-4 text-left">Status</th>
 
                         <th class="p-4 text-left">
@@ -56,6 +57,16 @@
                                     class="rounded-full border border-purple-500/20 bg-purple-500/10 px-2 py-0.5 text-[10px] text-purple-300">
                                     INVEST
                                 </span>
+
+                                <span v-if="isGeneratedPartial(item)"
+                                    class="rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[10px] text-amber-300">
+                                    PARTIAL EXIT
+                                </span>
+
+                                <span v-if="isInvestmentCloseRecord(item)"
+                                    class="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-0.5 text-[10px] text-cyan-300">
+                                    INVESTMENT SELL
+                                </span>
                             </div>
                         </td>
 
@@ -76,9 +87,39 @@
                         </td>
 
                         <td class="p-4">
+                            <div class="space-y-1 text-xs">
+                                <template v-if="isInvestmentCloseRecord(item)">
+                                    <div class="page-body font-medium">
+                                        Sold: {{ formatQty(getTotalQty(item)) }}
+                                    </div>
+                                </template>
+
+                                <template v-else-if="item.position_type === 'investment'">
+                                    <div class="page-body font-medium">
+                                        Total: {{ formatQty(getTotalQty(item)) }}
+                                    </div>
+                                </template>
+
+                                <template v-else>
+                                    <div class="page-body font-medium">
+                                        Total: {{ formatQty(getTotalQty(item)) }}
+                                    </div>
+
+                                    <div v-if="showClosedInfo(item)" class="text-amber-300">
+                                        Closed: {{ formatQty(getClosedQty(item)) }}
+                                    </div>
+
+                                    <div v-if="showRemainingInfo(item)" class="text-emerald-300">
+                                        Remaining: {{ formatQty(getRemainingQty(item)) }}
+                                    </div>
+                                </template>
+                            </div>
+                        </td>
+
+                        <td class="p-4">
                             <span class="inline-flex rounded-full border px-2.5 py-1 text-xs font-medium"
-                                :class="statusBadgeClass(item.status)">
-                                {{ formatStatus(item.status) }}
+                                :class="statusBadgeClass(getDisplayStatus(item))">
+                                {{ formatStatus(getDisplayStatus(item)) }}
                             </span>
                         </td>
 
@@ -86,20 +127,12 @@
                             {{ item.exit_date ? formatDate(item.exit_date) : '-' }}
                         </td>
 
-                        <td class="p-4 font-medium"
-                            :class="Number(item.profit_loss || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'">
-                            {{
-                                item.profit_loss !== null
-                                    ? displayMoney(
-                                        item.profit_loss,
-                                        item.account?.currency || item.display_currency || 'IDR'
-                                    )
-                            : '-'
-                            }}
+                        <td class="p-4 font-medium" :class="pnlClass(item)">
+                            {{ pnlDisplay(item) }}
                         </td>
 
                         <td class="p-4 page-body">
-                            {{ item.r_multiple !== null ? item.r_multiple : '-' }}
+                            {{ rDisplay(item) }}
                         </td>
 
                         <td class="p-4">
@@ -109,10 +142,10 @@
                                     View
                                 </button>
 
-                                <button v-if="item.position_type !== 'investment'"
+                                <button v-if="canEdit(item)"
                                     class="btn-outline rounded-xl px-3 py-1.5 text-sm font-medium transition"
                                     @click="$emit('edit', item.id)">
-                                    Edit
+                                    Manage
                                 </button>
 
                                 <button
@@ -125,7 +158,7 @@
                     </tr>
 
                     <tr v-if="!items.length">
-                        <td colspan="11" class="p-8 text-center page-subtitle">
+                        <td colspan="12" class="p-8 text-center page-subtitle">
                             No trades found.
                         </td>
                     </tr>
@@ -170,6 +203,11 @@ function formatNumber(value) {
     }).format(Number(value || 0))
 }
 
+function formatQty(value) {
+    if (value === null || value === undefined || value === '') return '-'
+    return Number(value)
+}
+
 function displayMoney(value, currency = 'IDR') {
     if (value === null || value === undefined || value === '') return '-'
 
@@ -208,6 +246,98 @@ function statusBadgeClass(value) {
     }
 
     return 'badge-neutral'
+}
+
+function getClosedQty(item) {
+    return Number(item?.closed_quantity || 0)
+}
+
+function getTotalQty(item) {
+    return Number(item?.quantity || 0)
+}
+
+function getRemainingQty(item) {
+    if (isInvestmentCloseRecord(item)) {
+        return 0
+    }
+
+    if (item?.remaining_quantity !== undefined && item?.remaining_quantity !== null) {
+        return Number(item.remaining_quantity || 0)
+    }
+
+    const remaining = getTotalQty(item) - getClosedQty(item)
+    return remaining > 0 ? remaining : 0
+}
+
+function getDisplayStatus(item) {
+    const status = item?.status
+
+    if (isInvestmentCloseRecord(item)) return 'closed'
+    if (status === 'closed') return 'closed'
+    if (getClosedQty(item) > 0 && getRemainingQty(item) > 0) return 'partial'
+    if (getClosedQty(item) >= getTotalQty(item) && getTotalQty(item) > 0) return 'closed'
+    return status || 'open'
+}
+
+function isGeneratedPartial(item) {
+    const isClosed = getDisplayStatus(item) === 'closed'
+    const closedQty = getClosedQty(item)
+    const totalQty = getTotalQty(item)
+    const hasExit = !!item?.exit_date
+    const hasPnl = item?.profit_loss !== null && item?.profit_loss !== undefined
+
+    return (
+        item?.position_type !== 'investment' &&
+        isClosed &&
+        closedQty > 0 &&
+        closedQty === totalQty &&
+        hasExit &&
+        hasPnl &&
+        typeof item?.notes === 'string' &&
+        item.notes.startsWith('Generated from partial close')
+    )
+}
+
+function isInvestmentCloseRecord(item) {
+    return item?.position_type === 'investment' && item?.status === 'closed'
+}
+
+function showClosedInfo(item) {
+    if (item?.position_type === 'investment') return false
+    return getClosedQty(item) > 0
+}
+
+function showRemainingInfo(item) {
+    if (item?.position_type === 'investment') return false
+    return getDisplayStatus(item) !== 'closed' && getRemainingQty(item) > 0
+}
+
+function pnlDisplay(item) {
+    const currency = item.account?.currency || item.display_currency || 'IDR'
+
+    if (item.profit_loss === null || item.profit_loss === undefined) {
+        return '-'
+    }
+
+    return displayMoney(item.profit_loss, currency)
+}
+
+function pnlClass(item) {
+    if (item.profit_loss === null || item.profit_loss === undefined) {
+        return 'page-subtitle'
+    }
+
+    return Number(item.profit_loss || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'
+}
+
+function rDisplay(item) {
+    if (item.r_multiple === null || item.r_multiple === undefined) return '-'
+    return item.r_multiple
+}
+
+function canEdit(item) {
+    if (item.position_type === 'investment') return false
+    return true
 }
 </script>
 

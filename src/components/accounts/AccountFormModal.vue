@@ -22,7 +22,7 @@
             <BaseSelect v-model="form.currency" label="Currency" placeholder="Select currency"
               :options="ACCOUNT_CURRENCIES" :error="errors.currency" />
 
-            <BaseInput v-model="form.initial_balance" label="Initial Balance" type="number" placeholder="Use dot (.) for decimals. Do not use thousand separators."
+            <BaseInput v-model="form.initial_balance" label="Initial Balance" type="number" placeholder="1234.56"
               :error="errors.initial_balance" />
 
             <div class="modal-preview rounded-xl px-4 py-3 text-sm">

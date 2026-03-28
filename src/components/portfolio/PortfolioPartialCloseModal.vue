@@ -41,13 +41,13 @@
             </div>
 
             <form class="space-y-4" @submit.prevent="handleSubmit">
-                <BaseInput v-model="form.quantity" label="Quantity to Close *" type="number" placeholder="Use dot (.) for decimals. Do not use thousand separators."
+                <BaseInput v-model="form.quantity" label="Quantity to Close *" type="number" placeholder="1234.56"
                     :error="errors.quantity" />
 
-                <BaseInput v-model="form.exit_price" label="Exit Price *" type="number" placeholder="Use dot (.) for decimals. Do not use thousand separators."
+                <BaseInput v-model="form.exit_price" label="Exit Price *" type="number" placeholder="1234.56"
                     :error="errors.exit_price" />
 
-                <BaseInput v-model="form.exit_fee" label="Exit Fee" type="number" placeholder="Use dot (.) for decimals. Do not use thousand separators."
+                <BaseInput v-model="form.exit_fee" label="Exit Fee" type="number" placeholder="1234.56"
                     :error="errors.exit_fee" />
 
                 <BaseInput v-model="form.exit_date" label="Exit Date *" type="datetime-local"

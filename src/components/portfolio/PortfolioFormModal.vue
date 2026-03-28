@@ -29,13 +29,13 @@
                                 empty-label="Clear selection" :options="assetOptions" :disabled="isEdit"
                                 :error="errors.asset_id" />
 
-                            <BaseInput v-model="form.quantity" label="Quantity *" type="number" placeholder="Use dot (.) for decimals. Do not use thousand separators."
+                            <BaseInput v-model="form.quantity" label="Quantity *" type="number" placeholder="1234.56"
                                 :error="errors.quantity" />
 
-                            <BaseInput v-model="form.avg_price" label="Average Price *" type="number" placeholder="Use dot (.) for decimals. Do not use thousand separators."
+                            <BaseInput v-model="form.avg_price" label="Average Price *" type="number" placeholder="1234.56"
                                 :error="errors.avg_price" />
 
-                            <BaseInput v-model="form.total_fees" label="Total Fees" type="number" placeholder="Use dot (.) for decimals. Do not use thousand separators."
+                            <BaseInput v-model="form.total_fees" label="Total Fees" type="number" placeholder="1234.56"
                                 :error="errors.total_fees" />
                         </template>
 
@@ -82,7 +82,7 @@
                             </div>
                         </template>
 
-                        <BaseInput v-model="form.target_price" label="Target Price" type="number" placeholder="Use dot (.) for decimals. Do not use thousand separators."
+                        <BaseInput v-model="form.target_price" label="Target Price" type="number" placeholder="1234.56"
                             :error="errors.target_price" />
 
                         <BaseSelect v-model="form.horizon" label="Horizon" placeholder="Select horizon"
