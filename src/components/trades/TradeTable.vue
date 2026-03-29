@@ -200,8 +200,8 @@ function formatDate(value) {
 
 function formatNumber(value) {
     return new Intl.NumberFormat('id-ID', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
+        minimumFractionDigits: 6,
+        maximumFractionDigits: 6,
     }).format(Number(value || 0))
 }
 

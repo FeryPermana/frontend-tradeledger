@@ -1,14 +1,15 @@
 <template>
     <div class="min-h-screen bg-slate-950 text-slate-100">
         <PromoModal v-model="showPromoModal" @close="handlePromoClose" />
+
         <!-- Header -->
         <header class="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-950/85 backdrop-blur">
             <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
-                <RouterLink to="/" class="flex items-center sm:items-center gap-3">
+                <RouterLink to="/" class="flex items-center gap-3 sm:items-center">
                     <img :src="logo" alt="TradeLedger Logo" class="h-10 w-auto object-contain" />
 
                     <div class="flex flex-col justify-center">
-                        <div class="hidden sm:block text-lg font-semibold tracking-tight text-white">
+                        <div class="hidden text-lg font-semibold tracking-tight text-white sm:block">
                             TradeLedger
                         </div>
 
@@ -114,8 +115,7 @@
 
                         <p class="mt-6 max-w-xl text-base leading-7 text-slate-300 sm:text-lg">
                             TradeLedger is your trading and investment operating system - built to help you stay
-                            disciplined,
-                            review what works, and make better decisions with clearer records.
+                            disciplined, review what works, and make better decisions with clearer records.
                         </p>
 
                         <div class="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -157,6 +157,70 @@
                 </div>
             </section>
 
+            <!-- App Demo Slider -->
+            <section class="border-t border-slate-900">
+                <div class="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+                    <div class="mx-auto max-w-3xl text-center">
+                        <h2 class="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                            Explore the TradeLedger interface
+                        </h2>
+                        <p class="mt-4 text-base leading-7 text-slate-400">
+                            Preview dashboard, analytics, portfolio, and trading journal in one workflow.
+                        </p>
+                    </div>
+
+                    <div ref="sliderWrapper"
+                        class="relative mx-auto mt-12 max-w-5xl cursor-grab active:cursor-grabbing select-none"
+                        @mouseenter="pauseSlider" @mouseleave="startSlider" @mousedown="startDrag" @mousemove="onDrag"
+                        @mouseup="endDrag" @mouseleave.capture="endDrag" @touchstart.passive="startDrag"
+                        @touchmove.passive="onDrag" @touchend="endDrag">
+                        <div class="absolute -inset-4 rounded-[2rem] bg-cyan-500/10 blur-3xl"></div>
+
+                        <div
+                            class="relative overflow-hidden rounded-[2rem] border border-slate-800 bg-slate-900/70 shadow-2xl">
+                            <div class="flex transition-transform duration-500 ease-out"
+                                :class="{ 'transition-none': isDragging }"
+                                :style="{ transform: `translateX(calc(-${currentSlide * 100}% + ${dragOffset}px))` }">
+                                <div v-for="(slide, index) in demoSlides" :key="index" class="w-full shrink-0">
+                                    <div class="bg-slate-950 px-4 pt-4 sm:px-6 sm:pt-6">
+                                        <div
+                                            class="overflow-hidden rounded-[1.5rem] border border-slate-800 bg-slate-950">
+                                            <img :src="slide.image" :alt="slide.title"
+                                                class="mx-auto h-auto max-h-[220px] w-full object-contain transition duration-700 ease-out hover:scale-[1.03] sm:max-h-[420px] lg:max-h-[520px]"
+                                                :class="currentSlide === index ? 'scale-100 opacity-100' : 'scale-95 opacity-70'"
+                                                draggable="false" />
+                                        </div>
+                                    </div>
+
+                                    <div class="px-5 py-5 sm:px-6 sm:py-6">
+                                        <div class="flex items-start justify-between gap-4">
+                                            <div>
+                                                <h3 class="text-xl font-semibold text-white">{{ slide.title }}</h3>
+                                                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+                                                    {{ slide.description }}
+                                                </p>
+                                            </div>
+
+                                            <div class="shrink-0 text-sm font-medium text-cyan-300">
+                                                {{ index + 1 }} / {{ demoSlides.length }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dots -->
+                        <div class="mt-6 flex justify-center gap-2">
+                            <button v-for="(slide, index) in demoSlides" :key="slide.title"
+                                class="h-2.5 rounded-full transition-all duration-300"
+                                :class="currentSlide === index ? 'w-8 bg-cyan-400' : 'w-2.5 bg-slate-600 hover:bg-slate-500'"
+                                @click="goToSlide(index)" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Value -->
             <section class="border-t border-slate-900">
                 <div class="mx-auto max-w-7xl px-6 py-16 lg:px-8">
@@ -167,8 +231,7 @@
                         </h2>
                         <p class="mt-4 text-base leading-7 text-slate-400">
                             When trades, portfolio movements, and review notes are scattered, progress becomes harder to
-                            read.
-                            TradeLedger helps you keep everything in one structured workflow.
+                            read. TradeLedger helps you keep everything in one structured workflow.
                         </p>
                     </div>
 
@@ -278,8 +341,7 @@
                             </h2>
                             <p class="mt-4 text-base leading-7 text-slate-400">
                                 TradeLedger is designed for users who prefer real-asset participation, clearer risk
-                                boundaries,
-                                and a more structured workflow.
+                                boundaries, and a more structured workflow.
                             </p>
                         </div>
 
@@ -380,7 +442,7 @@
                                         : 'border-slate-800 bg-slate-950 hover:border-slate-700'"
                                     @click="selectedPlan = '3_months'">
                                     <div class="flex items-center justify-between">
-                                        <div class="text-sm text-slate-400">3 Bulan</div>
+                                        <div class="text-sm text-slate-400">3 Months</div>
                                         <span class="text-[10px] font-semibold text-emerald-400">Starter</span>
                                     </div>
                                     <div class="mt-2 text-xl font-bold text-white">Rp 60.000</div>
@@ -393,7 +455,7 @@
                                         : 'border-slate-800 bg-slate-950 hover:border-slate-700'"
                                     @click="selectedPlan = '8_months'">
                                     <div class="flex items-center justify-between">
-                                        <div class="text-sm text-slate-400">8 Bulan</div>
+                                        <div class="text-sm text-slate-400">8 Months</div>
                                         <span class="text-[10px] font-semibold text-emerald-400">Smart Choice</span>
                                     </div>
                                     <div class="mt-2 text-xl font-bold text-white">Rp 150.000</div>
@@ -405,7 +467,7 @@
                                         : 'border-slate-800 bg-slate-950 hover:border-slate-700'"
                                     @click="selectedPlan = '12_months'">
                                     <div class="flex items-center justify-between">
-                                        <div class="text-sm text-slate-400">1 Tahun</div>
+                                        <div class="text-sm text-slate-400">1 Year</div>
                                         <span class="text-[10px] font-semibold text-emerald-400">Best Value</span>
                                     </div>
                                     <div class="mt-2 text-xl font-bold text-white">Rp 250.000</div>
@@ -508,21 +570,29 @@
             </div>
         </footer>
     </div>
+
     <FloatingWhatsApp />
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import PromoModal from '@/components/PromoModal.vue'
 import logo from '@/assets/logo.png'
 import heroBanner from '@/assets/landing/hero-benner.png'
+import demoDashboard1 from '@/assets/landing/demo-dashboard-1.png'
+import demoDashboard2 from '@/assets/landing/demo-dashboard-2.png'
+import demoTrades from '@/assets/landing/demo-trades.png'
+import demoPortfolio from '@/assets/landing/demo-portfolio.png'
 import FloatingWhatsApp from '@/components/common/FloatingWhatsApp.vue'
 
 const mobileMenuOpen = ref(false)
 const selectedPlan = ref('8_months')
 const activeFaq = ref('Is TradeLedger a trading platform?')
 const showPromoModal = ref(false)
+const currentSlide = ref(0)
+const dragOffset = ref(0)
+const sliderWrapper = ref(null)
 
 const PROMO_STORAGE_KEY = 'tradeledger_promo_modal_closed'
 
@@ -549,6 +619,33 @@ const faqs = [
     },
 ]
 
+const demoSlides = [
+    {
+        image: demoDashboard1,
+        title: 'Dashboard Overview',
+        description: 'Monitor total trades, win rate, net profit, profit factor, and strategy insights.',
+    },
+    {
+        image: demoDashboard2,
+        title: 'Analytics & Monthly Performance',
+        description: 'View monthly performance, tag performance, and portfolio snapshots with clarity.',
+    },
+    {
+        image: demoTrades,
+        title: 'Trade Journal',
+        description: 'Track entry, exit, quantity, partial closes, and trade status in one clean table.',
+    },
+    {
+        image: demoPortfolio,
+        title: 'Portfolio Tracking',
+        description: 'Monitor investment positions, average price, allocation, and asset growth.',
+    },
+]
+
+let sliderInterval = null
+let isDragging = false
+let startX = 0
+
 function closeMobileMenu() {
     mobileMenuOpen.value = false
 }
@@ -561,7 +658,82 @@ function handlePromoClose() {
     localStorage.setItem(PROMO_STORAGE_KEY, 'true')
 }
 
+function nextSlide() {
+    currentSlide.value = (currentSlide.value + 1) % demoSlides.length
+}
+
+function prevSlide() {
+    currentSlide.value = (currentSlide.value - 1 + demoSlides.length) % demoSlides.length
+}
+
+function goToSlide(index) {
+    currentSlide.value = index
+    resetSlider()
+}
+
+function startSlider() {
+    stopSlider()
+    sliderInterval = setInterval(() => {
+        nextSlide()
+    }, 4000)
+}
+
+function stopSlider() {
+    if (sliderInterval) {
+        clearInterval(sliderInterval)
+        sliderInterval = null
+    }
+}
+
+function pauseSlider() {
+    stopSlider()
+}
+
+function resetSlider() {
+    stopSlider()
+    startSlider()
+}
+
+function getPointerX(event) {
+    if (event.type.startsWith('mouse')) return event.clientX
+    if (event.touches?.length) return event.touches[0].clientX
+    if (event.changedTouches?.length) return event.changedTouches[0].clientX
+    return 0
+}
+
+function startDrag(event) {
+    isDragging = true
+    startX = getPointerX(event)
+    dragOffset.value = 0
+    stopSlider()
+}
+
+function onDrag(event) {
+    if (!isDragging) return
+    const currentX = getPointerX(event)
+    dragOffset.value = currentX - startX
+}
+
+function endDrag() {
+    if (!isDragging) return
+
+    if (dragOffset.value < -50) {
+        nextSlide()
+    } else if (dragOffset.value > 50) {
+        prevSlide()
+    }
+
+    dragOffset.value = 0
+    isDragging = false
+    startSlider()
+}
+
 onMounted(() => {
     showPromoModal.value = true
+    startSlider()
+})
+
+onUnmounted(() => {
+    stopSlider()
 })
 </script>
