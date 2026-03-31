@@ -19,6 +19,48 @@
       </div>
     </div>
 
+    <!-- FILTER -->
+    <BaseCard>
+      <div class="flex flex-col gap-4">
+        <div>
+          <h2 class="page-title text-lg font-semibold">Filters</h2>
+          <p class="page-subtitle mt-1 text-sm">
+            Filter dashboard analytics by date.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="mb-2 block text-sm font-medium page-body">Start Date</label>
+            <input
+              v-model="filters.date_from"
+              type="date"
+              class="filter-input"
+            />
+          </div>
+
+          <div>
+            <label class="mb-2 block text-sm font-medium page-body">End Date</label>
+            <input
+              v-model="filters.date_to"
+              type="date"
+              class="filter-input"
+            />
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2 sm:flex-row">
+          <BaseButton @click="applyFilters">
+            Apply Filters
+          </BaseButton>
+
+          <BaseButton variant="secondary" @click="resetFilters">
+            Reset Filters
+          </BaseButton>
+        </div>
+      </div>
+    </BaseCard>
+
     <div v-if="analyticsStore.loading" class="surface-soft rounded-2xl p-6 page-subtitle">
       Loading dashboard...
     </div>
@@ -47,8 +89,10 @@
 
         <BaseCard>
           <p class="page-subtitle text-sm">Net Profit</p>
-          <p class="mt-3 text-3xl font-bold"
-            :class="Number(summary.net_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'">
+          <p
+            class="mt-3 text-3xl font-bold"
+            :class="Number(summary.net_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'"
+          >
             {{ formatMoney(summary.net_profit, summary.display_currency) }}
           </p>
           <p class="page-caption mt-2 text-xs">
@@ -90,21 +134,28 @@
               </thead>
 
               <tbody>
-                <tr v-for="item in strategyRows" :key="item.strategy_id ?? item.strategy_name"
-                  class="surface-table-row">
+                <tr
+                  v-for="item in strategyRows"
+                  :key="item.strategy_id ?? item.strategy_name"
+                  class="surface-table-row"
+                >
                   <td class="p-4 font-medium page-title">{{ item.strategy_name }}</td>
                   <td class="p-4 page-body">{{ item.total_trades }}</td>
                   <td class="p-4 page-body">{{ formatPercent(item.win_rate) }}</td>
-                  <td class="p-4 font-medium"
-                    :class="Number(item.net_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'">
+                  <td
+                    class="p-4 font-medium"
+                    :class="Number(item.net_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'"
+                  >
                     {{ formatMoney(item.net_profit, summary.display_currency) }}
                   </td>
                   <td class="p-4 page-body">
                     {{ displayProfitFactor(item.profit_factor) }}
                   </td>
                   <td class="p-4">
-                    <span class="inline-flex rounded-full border px-2.5 py-1 text-xs font-medium"
-                      :class="performanceBadgeClass(item)">
+                    <span
+                      class="inline-flex rounded-full border px-2.5 py-1 text-xs font-medium"
+                      :class="performanceBadgeClass(item)"
+                    >
                       {{ performanceLabel(item) }}
                     </span>
                   </td>
@@ -114,8 +165,11 @@
           </div>
 
           <div v-if="strategyRows.length" class="space-y-3 md:hidden">
-            <div v-for="item in strategyRows" :key="`mobile-${item.strategy_id ?? item.strategy_name}`"
-              class="surface-soft rounded-2xl p-4">
+            <div
+              v-for="item in strategyRows"
+              :key="`mobile-${item.strategy_id ?? item.strategy_name}`"
+              class="surface-soft rounded-2xl p-4"
+            >
               <div class="flex flex-col gap-3">
                 <div class="flex items-start justify-between gap-3">
                   <div class="min-w-0">
@@ -125,8 +179,10 @@
                     </p>
                   </div>
 
-                  <span class="shrink-0 inline-flex rounded-full border px-2 py-1 text-[11px] font-medium"
-                    :class="performanceBadgeClass(item)">
+                  <span
+                    class="shrink-0 inline-flex rounded-full border px-2 py-1 text-[11px] font-medium"
+                    :class="performanceBadgeClass(item)"
+                  >
                     {{ performanceLabel(item) }}
                   </span>
                 </div>
@@ -134,8 +190,10 @@
                 <div class="grid grid-cols-2 gap-3">
                   <div class="surface-soft rounded-xl p-3">
                     <p class="text-xs page-subtitle">Profit</p>
-                    <p class="mt-1 text-sm font-semibold"
-                      :class="Number(item.net_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'">
+                    <p
+                      class="mt-1 text-sm font-semibold"
+                      :class="Number(item.net_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'"
+                    >
                       {{ formatMoney(item.net_profit, summary.display_currency) }}
                     </p>
                   </div>
@@ -224,13 +282,19 @@
           </div>
 
           <div v-if="tagRows.length" class="space-y-3">
-            <div v-for="item in tagRows" :key="item.tag_id ?? item.tag_name" class="surface-soft rounded-2xl p-4">
+            <div
+              v-for="item in tagRows"
+              :key="item.tag_id ?? item.tag_name"
+              class="surface-soft rounded-2xl p-4"
+            >
               <div class="flex items-start justify-between gap-3">
                 <div>
                   <div class="flex flex-wrap items-center gap-2">
                     <p class="font-medium page-title">{{ item.tag_name }}</p>
-                    <span class="inline-flex rounded-full border px-2.5 py-1 text-xs font-medium"
-                      :class="performanceBadgeClass(item)">
+                    <span
+                      class="inline-flex rounded-full border px-2.5 py-1 text-xs font-medium"
+                      :class="performanceBadgeClass(item)"
+                    >
                       {{ performanceLabel(item) }}
                     </span>
                   </div>
@@ -241,8 +305,10 @@
                 </div>
 
                 <div class="text-right">
-                  <p class="font-semibold"
-                    :class="Number(item.net_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'">
+                  <p
+                    class="font-semibold"
+                    :class="Number(item.net_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'"
+                  >
                     {{ formatMoney(item.net_profit, summary.display_currency) }}
                   </p>
                   <p class="mt-1 text-xs page-caption">
@@ -268,11 +334,16 @@
 
           <div v-if="monthlyRows.length" class="space-y-4">
             <div class="surface-soft flex h-56 items-end gap-2 overflow-hidden rounded-2xl p-4 sm:gap-3">
-              <div v-for="item in monthlyRows" :key="item.month"
-                class="flex min-w-0 flex-1 flex-col items-center justify-end gap-2">
-                <div class="w-full rounded-t-xl"
+              <div
+                v-for="item in monthlyRows"
+                :key="item.month"
+                class="flex min-w-0 flex-1 flex-col items-center justify-end gap-2"
+              >
+                <div
+                  class="w-full rounded-t-xl"
                   :class="Number(item.net_profit || 0) >= 0 ? 'bg-emerald-500/70' : 'bg-red-500/70'"
-                  :style="{ height: `${getBarHeight(item.net_profit)}px` }" />
+                  :style="{ height: `${getBarHeight(item.net_profit)}px` }"
+                />
                 <span class="text-[10px] page-caption sm:text-[11px]">
                   {{ formatMonthShort(item.month) }}
                 </span>
@@ -280,11 +351,17 @@
             </div>
 
             <div class="grid gap-3 sm:grid-cols-2">
-              <div v-for="item in monthlyRows" :key="`${item.month}-info`" class="surface-soft rounded-2xl p-4">
+              <div
+                v-for="item in monthlyRows"
+                :key="`${item.month}-info`"
+                class="surface-soft rounded-2xl p-4"
+              >
                 <div class="flex items-start justify-between gap-3">
                   <p class="font-medium page-title">{{ formatMonthLabel(item.month) }}</p>
-                  <p class="text-sm font-semibold"
-                    :class="Number(item.net_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'">
+                  <p
+                    class="text-sm font-semibold"
+                    :class="Number(item.net_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'"
+                  >
                     {{ formatMoney(item.net_profit, summary.display_currency) }}
                   </p>
                 </div>
@@ -354,8 +431,10 @@
                 </div>
 
                 <div class="progress-bg h-2 overflow-hidden rounded-full">
-                  <div class="h-full rounded-full bg-cyan-500"
-                    :style="{ width: `${Math.min(Number(item.percentage || 0), 100)}%` }" />
+                  <div
+                    class="h-full rounded-full bg-cyan-500"
+                    :style="{ width: `${Math.min(Number(item.percentage || 0), 100)}%` }"
+                  />
                 </div>
 
                 <p class="mt-2 text-sm page-subtitle">
@@ -375,19 +454,39 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
 import { useAuthStore } from '@/stores/auth.store'
 import { useAnalyticsStore } from '@/stores/analytics.store'
+import { useAccountStore } from '@/stores/account.store'
+import { useStrategyStore } from '@/stores/strategy.store'
+import { useTagStore } from '@/stores/tag.store'
 import { toastService } from '@/utils/toast'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const analyticsStore = useAnalyticsStore()
+const accountsStore = useAccountStore()
+const strategiesStore = useStrategyStore()
+const tagsStore = useTagStore()
+
+const filters = reactive({
+  date_from: '',
+  date_to: '',
+  account_id: '',
+  strategy_id: '',
+  tag_id: '',
+})
 
 onMounted(async () => {
+  await Promise.all([
+    accountsStore.getAccounts?.(),
+    strategiesStore.getStrategies?.(),
+    tagsStore.getTags?.(),
+  ])
+
   await refreshDashboard()
 })
 
@@ -413,6 +512,14 @@ const worstTag = computed(() => {
   return [...tagRows.value].sort((a, b) => Number(a.net_profit || 0) - Number(b.net_profit || 0))[0]
 })
 
+const activeFilters = computed(() => ({
+  date_from: filters.date_from || undefined,
+  date_to: filters.date_to || undefined,
+  account_id: filters.account_id || undefined,
+  strategy_id: filters.strategy_id || undefined,
+  tag_id: filters.tag_id || undefined,
+}))
+
 function handleUpgradeRequired(error) {
   const response = error.response?.data
 
@@ -431,7 +538,7 @@ async function refreshDashboard() {
   const toastId = toastService.loading('Loading dashboard...')
 
   try {
-    await analyticsStore.getDashboardData()
+    await analyticsStore.getDashboardData(activeFilters.value)
     toastService.dismiss(toastId)
   } catch (error) {
     toastService.dismiss(toastId)
@@ -447,6 +554,19 @@ async function refreshDashboard() {
       'Failed to load dashboard.'
     )
   }
+}
+
+async function applyFilters() {
+  await refreshDashboard()
+}
+
+async function resetFilters() {
+  filters.date_from = ''
+  filters.date_to = ''
+  filters.account_id = ''
+  filters.strategy_id = ''
+  filters.tag_id = ''
+  await refreshDashboard()
 }
 
 async function handleLogout() {
@@ -585,5 +705,20 @@ function performanceBadgeClass(item) {
 
 .progress-bg {
   background: var(--progress-bg);
+}
+
+.filter-input {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid var(--surface-soft-border);
+  background: var(--surface-soft-bg);
+  color: var(--text-body);
+  padding: 0.75rem 1rem;
+  outline: none;
+}
+
+.filter-input:focus {
+  border-color: rgb(34 211 238 / 0.6);
+  box-shadow: 0 0 0 3px rgb(34 211 238 / 0.12);
 }
 </style>

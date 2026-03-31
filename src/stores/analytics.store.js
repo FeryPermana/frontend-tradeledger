@@ -66,15 +66,15 @@ export const useAnalyticsStore = defineStore('analytics', {
       return res
     },
 
-    async getDashboardData(params = {}) {
+    async getDashboardData(params = {}, filters = {}) {
       this.loading = true
 
       try {
         await Promise.all([
-          this.getSummary(params),
-          this.getStrategyPerformance(params),
-          this.getTagPerformance(params),
-          this.getMonthlyPerformance(params),
+          this.getSummary(params, filters),
+          this.getStrategyPerformance(params, filters),
+          this.getTagPerformance(params, filters),
+          this.getMonthlyPerformance(params, filters),
           this.getPortfolioSummary(params),
           this.getAssetAllocation(params),
         ])
