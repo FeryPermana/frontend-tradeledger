@@ -16,10 +16,14 @@ export function fetchMonthlyPerformance(params = {}) {
   return api.get('/analytics/monthly-performance', { params })
 }
 
-export function fetchPortfolioSummary(params = {}) {
-  return api.get('/analytics/portfolio-summary', { params })
+export function fetchAssetPerformance(params = {}) {
+  return api.get('/analytics/asset-performance', { params })
 }
 
-export function fetchAssetAllocation(params = {}) {
-  return api.get('/analytics/asset-allocation', { params })
+export function fetchPortfolioSummary() {
+  return api.get('/analytics/portfolio-summary')
+}
+
+export function fetchAssetAllocation() {
+  return api.get('/analytics/asset-allocation')
 }

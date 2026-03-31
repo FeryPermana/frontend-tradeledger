@@ -4,6 +4,7 @@ import {
   fetchStrategyPerformance,
   fetchTagPerformance,
   fetchMonthlyPerformance,
+  fetchAssetPerformance,
   fetchPortfolioSummary,
   fetchAssetAllocation,
 } from '@/api/analytics.api'
@@ -14,6 +15,7 @@ export const useAnalyticsStore = defineStore('analytics', {
     strategyPerformance: [],
     tagPerformance: [],
     monthlyPerformance: [],
+    assetPerformance: [],
     portfolioSummary: null,
     assetAllocation: [],
     loading: false,
@@ -25,6 +27,7 @@ export const useAnalyticsStore = defineStore('analytics', {
       this.strategyPerformance = []
       this.tagPerformance = []
       this.monthlyPerformance = []
+      this.assetPerformance = []
       this.portfolioSummary = null
       this.assetAllocation = []
       this.loading = false
@@ -33,50 +36,57 @@ export const useAnalyticsStore = defineStore('analytics', {
     async getSummary(params = {}) {
       const res = await fetchAnalyticsSummary(params)
       this.summary = res.data?.data ?? null
-      return res
+      return this.summary
     },
 
     async getStrategyPerformance(params = {}) {
       const res = await fetchStrategyPerformance(params)
       this.strategyPerformance = res.data?.data ?? []
-      return res
+      return this.strategyPerformance
     },
 
     async getTagPerformance(params = {}) {
       const res = await fetchTagPerformance(params)
       this.tagPerformance = res.data?.data ?? []
-      return res
+      return this.tagPerformance
     },
 
     async getMonthlyPerformance(params = {}) {
       const res = await fetchMonthlyPerformance(params)
       this.monthlyPerformance = res.data?.data ?? []
-      return res
+      return this.monthlyPerformance
     },
 
-    async getPortfolioSummary(params = {}) {
-      const res = await fetchPortfolioSummary(params)
+    async getAssetPerformance(params = {}) {
+      const res = await fetchAssetPerformance(params)
+      this.assetPerformance = res.data?.data ?? []
+      return this.assetPerformance
+    },
+
+    async getPortfolioSummary() {
+      const res = await fetchPortfolioSummary()
       this.portfolioSummary = res.data?.data ?? null
-      return res
+      return this.portfolioSummary
     },
 
-    async getAssetAllocation(params = {}) {
-      const res = await fetchAssetAllocation(params)
+    async getAssetAllocation() {
+      const res = await fetchAssetAllocation()
       this.assetAllocation = res.data?.data ?? []
-      return res
+      return this.assetAllocation
     },
 
-    async getDashboardData(params = {}, filters = {}) {
+    async getDashboardData(params = {}) {
       this.loading = true
 
       try {
         await Promise.all([
-          this.getSummary(params, filters),
-          this.getStrategyPerformance(params, filters),
-          this.getTagPerformance(params, filters),
-          this.getMonthlyPerformance(params, filters),
-          this.getPortfolioSummary(params),
-          this.getAssetAllocation(params),
+          this.getSummary(params),
+          this.getStrategyPerformance(params),
+          this.getTagPerformance(params),
+          this.getMonthlyPerformance(params),
+          this.getAssetPerformance(params),
+          this.getPortfolioSummary(),
+          this.getAssetAllocation(),
         ])
       } finally {
         this.loading = false

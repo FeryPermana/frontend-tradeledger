@@ -1,65 +1,25 @@
 <template>
   <div class="space-y-6">
-    <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div class="min-w-0">
-        <h1 class="page-title text-2xl font-bold md:text-3xl">Dashboard</h1>
+        <h1 class="page-title text-2xl font-bold">Dashboard</h1>
         <p class="page-subtitle mt-1 text-sm">
-          Welcome back, {{ authStore.userName || 'Trader' }}. Review your edge, habits, and portfolio in one place.
+          Review your edge, habits, asset performance, and portfolio in one place.
         </p>
       </div>
 
       <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-        <BaseButton variant="secondary" @click="refreshDashboard">
+        <BaseButton variant="secondary" class="w-full sm:w-auto" @click="refreshDashboard">
           Refresh
         </BaseButton>
 
-        <BaseButton variant="secondary" @click="handleLogout">
+        <BaseButton variant="secondary" class="w-full sm:w-auto" @click="handleLogout">
           Logout
         </BaseButton>
       </div>
     </div>
 
-    <!-- FILTER -->
-    <BaseCard>
-      <div class="flex flex-col gap-4">
-        <div>
-          <h2 class="page-title text-lg font-semibold">Filters</h2>
-          <p class="page-subtitle mt-1 text-sm">
-            Filter dashboard analytics by date.
-          </p>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="mb-2 block text-sm font-medium page-body">Start Date</label>
-            <input
-              v-model="filters.date_from"
-              type="date"
-              class="filter-input"
-            />
-          </div>
-
-          <div>
-            <label class="mb-2 block text-sm font-medium page-body">End Date</label>
-            <input
-              v-model="filters.date_to"
-              type="date"
-              class="filter-input"
-            />
-          </div>
-        </div>
-
-        <div class="flex flex-col gap-2 sm:flex-row">
-          <BaseButton @click="applyFilters">
-            Apply Filters
-          </BaseButton>
-
-          <BaseButton variant="secondary" @click="resetFilters">
-            Reset Filters
-          </BaseButton>
-        </div>
-      </div>
-    </BaseCard>
+    <DashboardFilterBar @apply="handleApplyFilters" @reset="handleResetFilters" />
 
     <div v-if="analyticsStore.loading" class="surface-soft rounded-2xl p-6 page-subtitle">
       Loading dashboard...
@@ -69,19 +29,13 @@
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <BaseCard>
           <p class="page-subtitle text-sm">Total Trades</p>
-          <p class="page-title mt-3 text-3xl font-bold">
-            {{ summary.total_trades ?? 0 }}
-          </p>
-          <p class="page-caption mt-2 text-xs">
-            Closed trades with realized results
-          </p>
+          <p class="page-title mt-3 text-3xl font-bold">{{ summary.total_trades ?? 0 }}</p>
+          <p class="page-caption mt-2 text-xs">Closed trades with realized results</p>
         </BaseCard>
 
         <BaseCard>
           <p class="page-subtitle text-sm">Win Rate</p>
-          <p class="page-title mt-3 text-3xl font-bold">
-            {{ formatPercent(summary.win_rate) }}
-          </p>
+          <p class="page-title mt-3 text-3xl font-bold">{{ formatPercent(summary.win_rate) }}</p>
           <p class="page-caption mt-2 text-xs">
             {{ summary.winning_trades ?? 0 }} win / {{ summary.losing_trades ?? 0 }} loss
           </p>
@@ -89,10 +43,8 @@
 
         <BaseCard>
           <p class="page-subtitle text-sm">Net Profit</p>
-          <p
-            class="mt-3 text-3xl font-bold"
-            :class="Number(summary.net_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'"
-          >
+          <p class="mt-3 text-3xl font-bold"
+            :class="Number(summary.net_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'">
             {{ formatMoney(summary.net_profit, summary.display_currency) }}
           </p>
           <p class="page-caption mt-2 text-xs">
@@ -102,9 +54,7 @@
 
         <BaseCard>
           <p class="page-subtitle text-sm">Profit Factor</p>
-          <p class="page-title mt-3 text-3xl font-bold">
-            {{ displayProfitFactor(summary.profit_factor) }}
-          </p>
+          <p class="page-title mt-3 text-3xl font-bold">{{ displayProfitFactor(summary.profit_factor) }}</p>
           <p class="page-caption mt-2 text-xs">
             Avg win {{ formatMoney(summary.average_win, summary.display_currency) }}
           </p>
@@ -134,79 +84,25 @@
               </thead>
 
               <tbody>
-                <tr
-                  v-for="item in strategyRows"
-                  :key="item.strategy_id ?? item.strategy_name"
-                  class="surface-table-row"
-                >
+                <tr v-for="item in strategyRows" :key="item.strategy_id ?? item.strategy_name"
+                  class="surface-table-row">
                   <td class="p-4 font-medium page-title">{{ item.strategy_name }}</td>
                   <td class="p-4 page-body">{{ item.total_trades }}</td>
                   <td class="p-4 page-body">{{ formatPercent(item.win_rate) }}</td>
-                  <td
-                    class="p-4 font-medium"
-                    :class="Number(item.net_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'"
-                  >
+                  <td class="p-4 font-medium"
+                    :class="Number(item.net_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'">
                     {{ formatMoney(item.net_profit, summary.display_currency) }}
                   </td>
-                  <td class="p-4 page-body">
-                    {{ displayProfitFactor(item.profit_factor) }}
-                  </td>
+                  <td class="p-4 page-body">{{ displayProfitFactor(item.profit_factor) }}</td>
                   <td class="p-4">
-                    <span
-                      class="inline-flex rounded-full border px-2.5 py-1 text-xs font-medium"
-                      :class="performanceBadgeClass(item)"
-                    >
+                    <span class="inline-flex rounded-full border px-2.5 py-1 text-xs font-medium"
+                      :class="performanceBadgeClass(item)">
                       {{ performanceLabel(item) }}
                     </span>
                   </td>
                 </tr>
               </tbody>
             </table>
-          </div>
-
-          <div v-if="strategyRows.length" class="space-y-3 md:hidden">
-            <div
-              v-for="item in strategyRows"
-              :key="`mobile-${item.strategy_id ?? item.strategy_name}`"
-              class="surface-soft rounded-2xl p-4"
-            >
-              <div class="flex flex-col gap-3">
-                <div class="flex items-start justify-between gap-3">
-                  <div class="min-w-0">
-                    <p class="break-words font-semibold page-title">{{ item.strategy_name }}</p>
-                    <p class="mt-1 text-sm page-subtitle">
-                      {{ item.total_trades }} trades • Winrate {{ formatPercent(item.win_rate) }}
-                    </p>
-                  </div>
-
-                  <span
-                    class="shrink-0 inline-flex rounded-full border px-2 py-1 text-[11px] font-medium"
-                    :class="performanceBadgeClass(item)"
-                  >
-                    {{ performanceLabel(item) }}
-                  </span>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                  <div class="surface-soft rounded-xl p-3">
-                    <p class="text-xs page-subtitle">Profit</p>
-                    <p
-                      class="mt-1 text-sm font-semibold"
-                      :class="Number(item.net_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'"
-                    >
-                      {{ formatMoney(item.net_profit, summary.display_currency) }}
-                    </p>
-                  </div>
-
-                  <div class="surface-soft rounded-xl p-3">
-                    <p class="text-xs page-subtitle">Profit Factor</p>
-                    <p class="mt-1 text-sm font-semibold page-title">
-                      {{ displayProfitFactor(item.profit_factor) }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
           <div v-else class="surface-soft rounded-2xl p-6 text-center text-sm page-subtitle">
@@ -237,18 +133,18 @@
               </p>
             </div>
 
-            <div class="rounded-2xl border border-red-500/20 bg-red-500/10 p-4">
-              <p class="text-sm font-medium text-red-300">Worst Strategy</p>
+            <div class="rounded-2xl border border-cyan-500/20 bg-cyan-500/10 p-4">
+              <p class="text-sm font-medium text-cyan-300">Best Asset</p>
               <p class="mt-2 text-base font-semibold page-title">
-                {{ worstStrategy?.strategy_name || 'No data yet' }}
+                {{ bestAsset?.asset_symbol || bestAsset?.asset_name || 'No data yet' }}
               </p>
               <p class="mt-1 text-sm leading-6 page-body">
-                <template v-if="worstStrategy">
-                  Profit {{ formatMoney(worstStrategy.net_profit, summary.display_currency) }}
-                  • Winrate {{ formatPercent(worstStrategy.win_rate) }}
+                <template v-if="bestAsset">
+                  Profit {{ formatMoney(bestAsset.net_profit, summary.display_currency) }}
+                  • Winrate {{ formatPercent(bestAsset.win_rate) }}
                 </template>
                 <template v-else>
-                  No losing strategy detected yet.
+                  No asset edge detected yet.
                 </template>
               </p>
             </div>
@@ -275,26 +171,27 @@
       <div class="grid gap-4 xl:grid-cols-2">
         <BaseCard>
           <div class="mb-5">
-            <h2 class="page-title text-lg font-semibold">Tag Performance</h2>
+            <h2 class="page-title text-lg font-semibold">Asset Performance</h2>
             <p class="page-subtitle mt-1 text-sm">
-              Spot behavior patterns that help or hurt your performance.
+              Review realized net profit by asset, including DCA results that have been realized.
             </p>
           </div>
 
-          <div v-if="tagRows.length" class="space-y-3">
-            <div
-              v-for="item in tagRows"
-              :key="item.tag_id ?? item.tag_name"
-              class="surface-soft rounded-2xl p-4"
-            >
+          <div v-if="assetPerformanceRows.length" class="space-y-3">
+            <div v-for="item in assetPerformanceRows" :key="item.asset_id ?? item.asset_symbol"
+              class="surface-soft rounded-2xl p-4">
               <div class="flex items-start justify-between gap-3">
                 <div>
                   <div class="flex flex-wrap items-center gap-2">
-                    <p class="font-medium page-title">{{ item.tag_name }}</p>
-                    <span
-                      class="inline-flex rounded-full border px-2.5 py-1 text-xs font-medium"
-                      :class="performanceBadgeClass(item)"
-                    >
+                    <p class="font-medium page-title">{{ item.asset_symbol || item.asset_name }}</p>
+
+                    <span v-if="item.category"
+                      class="inline-flex rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-1 text-xs font-medium text-cyan-300">
+                      {{ formatCategoryLabel(item.category) }}
+                    </span>
+
+                    <span class="inline-flex rounded-full border px-2.5 py-1 text-xs font-medium"
+                      :class="performanceBadgeClass(item)">
                       {{ performanceLabel(item) }}
                     </span>
                   </div>
@@ -305,10 +202,51 @@
                 </div>
 
                 <div class="text-right">
-                  <p
-                    class="font-semibold"
-                    :class="Number(item.net_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'"
-                  >
+                  <p class="font-semibold"
+                    :class="Number(item.net_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'">
+                    {{ formatMoney(item.net_profit, summary.display_currency) }}
+                  </p>
+                  <p class="mt-1 text-xs page-caption">
+                    PF {{ displayProfitFactor(item.profit_factor) }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div v-else class="surface-soft rounded-2xl p-6 text-center text-sm page-subtitle">
+            No asset performance yet.
+          </div>
+        </BaseCard>
+
+        <BaseCard>
+          <div class="mb-5">
+            <h2 class="page-title text-lg font-semibold">Tag Performance</h2>
+            <p class="page-subtitle mt-1 text-sm">
+              Spot behavior patterns that help or hurt your performance.
+            </p>
+          </div>
+
+          <div v-if="tagRows.length" class="space-y-3">
+            <div v-for="item in tagRows" :key="item.tag_id ?? item.tag_name" class="surface-soft rounded-2xl p-4">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <p class="font-medium page-title">{{ item.tag_name }}</p>
+                    <span class="inline-flex rounded-full border px-2.5 py-1 text-xs font-medium"
+                      :class="performanceBadgeClass(item)">
+                      {{ performanceLabel(item) }}
+                    </span>
+                  </div>
+
+                  <p class="mt-1 text-sm page-subtitle">
+                    {{ item.total_trades }} trades • Winrate {{ formatPercent(item.win_rate) }}
+                  </p>
+                </div>
+
+                <div class="text-right">
+                  <p class="font-semibold"
+                    :class="Number(item.net_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'">
                     {{ formatMoney(item.net_profit, summary.display_currency) }}
                   </p>
                   <p class="mt-1 text-xs page-caption">
@@ -323,60 +261,49 @@
             No tag performance yet.
           </div>
         </BaseCard>
+      </div>
 
-        <BaseCard>
-          <div class="mb-5">
-            <h2 class="page-title text-lg font-semibold">Monthly Performance</h2>
-            <p class="page-subtitle mt-1 text-sm">
-              Quick visual overview of realized performance over time.
-            </p>
+      <BaseCard>
+        <div class="mb-5">
+          <h2 class="page-title text-lg font-semibold">Monthly Performance</h2>
+          <p class="page-subtitle mt-1 text-sm">
+            Quick visual overview of realized performance over time.
+          </p>
+        </div>
+
+        <div v-if="monthlyRows.length" class="space-y-4">
+          <div class="surface-soft flex h-56 items-end gap-2 overflow-hidden rounded-2xl p-4 sm:gap-3">
+            <div v-for="item in monthlyRows" :key="item.month"
+              class="flex min-w-0 flex-1 flex-col items-center justify-end gap-2">
+              <div class="w-full rounded-t-xl"
+                :class="Number(item.net_profit || 0) >= 0 ? 'bg-emerald-500/70' : 'bg-red-500/70'"
+                :style="{ height: `${getBarHeight(item.net_profit)}px` }" />
+              <span class="text-[10px] page-caption sm:text-[11px]">
+                {{ formatMonthShort(item.month) }}
+              </span>
+            </div>
           </div>
 
-          <div v-if="monthlyRows.length" class="space-y-4">
-            <div class="surface-soft flex h-56 items-end gap-2 overflow-hidden rounded-2xl p-4 sm:gap-3">
-              <div
-                v-for="item in monthlyRows"
-                :key="item.month"
-                class="flex min-w-0 flex-1 flex-col items-center justify-end gap-2"
-              >
-                <div
-                  class="w-full rounded-t-xl"
-                  :class="Number(item.net_profit || 0) >= 0 ? 'bg-emerald-500/70' : 'bg-red-500/70'"
-                  :style="{ height: `${getBarHeight(item.net_profit)}px` }"
-                />
-                <span class="text-[10px] page-caption sm:text-[11px]">
-                  {{ formatMonthShort(item.month) }}
-                </span>
-              </div>
-            </div>
-
-            <div class="grid gap-3 sm:grid-cols-2">
-              <div
-                v-for="item in monthlyRows"
-                :key="`${item.month}-info`"
-                class="surface-soft rounded-2xl p-4"
-              >
-                <div class="flex items-start justify-between gap-3">
-                  <p class="font-medium page-title">{{ formatMonthLabel(item.month) }}</p>
-                  <p
-                    class="text-sm font-semibold"
-                    :class="Number(item.net_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'"
-                  >
-                    {{ formatMoney(item.net_profit, summary.display_currency) }}
-                  </p>
-                </div>
-                <p class="mt-2 text-sm page-subtitle">
-                  {{ item.total_trades }} trades • Winrate {{ formatPercent(item.win_rate) }}
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div v-for="item in monthlyRows" :key="`${item.month}-info`" class="surface-soft rounded-2xl p-4">
+              <div class="flex items-start justify-between gap-3">
+                <p class="font-medium page-title">{{ formatMonthLabel(item.month) }}</p>
+                <p class="text-sm font-semibold"
+                  :class="Number(item.net_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'">
+                  {{ formatMoney(item.net_profit, summary.display_currency) }}
                 </p>
               </div>
+              <p class="mt-2 text-sm page-subtitle">
+                {{ item.total_trades }} trades • Winrate {{ formatPercent(item.win_rate) }}
+              </p>
             </div>
           </div>
+        </div>
 
-          <div v-else class="surface-soft rounded-2xl p-6 text-center text-sm page-subtitle">
-            No monthly performance yet.
-          </div>
-        </BaseCard>
-      </div>
+        <div v-else class="surface-soft rounded-2xl p-6 text-center text-sm page-subtitle">
+          No monthly performance yet.
+        </div>
+      </BaseCard>
 
       <BaseCard>
         <div class="mb-5">
@@ -398,7 +325,9 @@
             <div class="surface-soft rounded-2xl p-4">
               <p class="text-sm page-subtitle">Total Invested</p>
               <p class="mt-2 text-2xl font-bold page-title">
-                {{ formatMoney(portfolioSummary.total_invested, summary.display_currency) }}
+                {{ formatMoney(portfolioSummary.total_invested, portfolioSummary.display_currency ||
+                  summary.display_currency)
+                }}
               </p>
             </div>
 
@@ -411,7 +340,8 @@
                 <template v-if="portfolioSummary.largest_position">
                   Qty {{ formatQty(portfolioSummary.largest_position.quantity) }}
                   • Invested
-                  {{ formatMoney(portfolioSummary.largest_position.invested_value, summary.display_currency) }}
+                  {{ formatMoney(portfolioSummary.largest_position.invested_value, portfolioSummary.display_currency ||
+                    summary.display_currency) }}
                 </template>
                 <template v-else>
                   No investment position tracked yet.
@@ -431,14 +361,13 @@
                 </div>
 
                 <div class="progress-bg h-2 overflow-hidden rounded-full">
-                  <div
-                    class="h-full rounded-full bg-cyan-500"
-                    :style="{ width: `${Math.min(Number(item.percentage || 0), 100)}%` }"
-                  />
+                  <div class="h-full rounded-full bg-cyan-500"
+                    :style="{ width: `${Math.min(Number(item.percentage || 0), 100)}%` }" />
                 </div>
 
                 <p class="mt-2 text-sm page-subtitle">
-                  {{ formatMoney(item.value, summary.display_currency) }}
+                  {{ formatMoney(item.value, item.display_currency || portfolioSummary.display_currency ||
+                    summary.display_currency) }}
                 </p>
               </div>
             </div>
@@ -454,39 +383,20 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
+import DashboardFilterBar from '@/components/dashboard/DashboardFilterBar.vue'
 import { useAuthStore } from '@/stores/auth.store'
 import { useAnalyticsStore } from '@/stores/analytics.store'
-import { useAccountStore } from '@/stores/account.store'
-import { useStrategyStore } from '@/stores/strategy.store'
-import { useTagStore } from '@/stores/tag.store'
 import { toastService } from '@/utils/toast'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const analyticsStore = useAnalyticsStore()
-const accountsStore = useAccountStore()
-const strategiesStore = useStrategyStore()
-const tagsStore = useTagStore()
-
-const filters = reactive({
-  date_from: '',
-  date_to: '',
-  account_id: '',
-  strategy_id: '',
-  tag_id: '',
-})
 
 onMounted(async () => {
-  await Promise.all([
-    accountsStore.getAccounts?.(),
-    strategiesStore.getStrategies?.(),
-    tagsStore.getTags?.(),
-  ])
-
   await refreshDashboard()
 })
 
@@ -494,6 +404,7 @@ const summary = computed(() => analyticsStore.summary ?? {})
 const strategyRows = computed(() => analyticsStore.strategyPerformance ?? [])
 const tagRows = computed(() => analyticsStore.tagPerformance ?? [])
 const monthlyRows = computed(() => analyticsStore.monthlyPerformance ?? [])
+const assetPerformanceRows = computed(() => analyticsStore.assetPerformance ?? [])
 const portfolioSummary = computed(() => analyticsStore.portfolioSummary ?? {})
 const assetAllocation = computed(() => analyticsStore.assetAllocation ?? [])
 
@@ -502,23 +413,15 @@ const bestStrategy = computed(() => {
   return [...strategyRows.value].sort((a, b) => Number(b.net_profit || 0) - Number(a.net_profit || 0))[0]
 })
 
-const worstStrategy = computed(() => {
-  if (!strategyRows.value.length) return null
-  return [...strategyRows.value].sort((a, b) => Number(a.net_profit || 0) - Number(b.net_profit || 0))[0]
+const bestAsset = computed(() => {
+  if (!assetPerformanceRows.value.length) return null
+  return [...assetPerformanceRows.value].sort((a, b) => Number(b.net_profit || 0) - Number(a.net_profit || 0))[0]
 })
 
 const worstTag = computed(() => {
   if (!tagRows.value.length) return null
   return [...tagRows.value].sort((a, b) => Number(a.net_profit || 0) - Number(b.net_profit || 0))[0]
 })
-
-const activeFilters = computed(() => ({
-  date_from: filters.date_from || undefined,
-  date_to: filters.date_to || undefined,
-  account_id: filters.account_id || undefined,
-  strategy_id: filters.strategy_id || undefined,
-  tag_id: filters.tag_id || undefined,
-}))
 
 function handleUpgradeRequired(error) {
   const response = error.response?.data
@@ -538,14 +441,12 @@ async function refreshDashboard() {
   const toastId = toastService.loading('Loading dashboard...')
 
   try {
-    await analyticsStore.getDashboardData(activeFilters.value)
+    await analyticsStore.getDashboardData()
     toastService.dismiss(toastId)
   } catch (error) {
     toastService.dismiss(toastId)
 
-    if (handleUpgradeRequired(error)) {
-      return
-    }
+    if (handleUpgradeRequired(error)) return
 
     const response = error.response?.data
     toastService.error(
@@ -556,17 +457,44 @@ async function refreshDashboard() {
   }
 }
 
-async function applyFilters() {
-  await refreshDashboard()
+async function handleApplyFilters(payload) {
+  const toastId = toastService.loading('Applying filters...')
+
+  try {
+    await analyticsStore.getDashboardData(payload)
+    toastService.dismiss(toastId)
+  } catch (error) {
+    toastService.dismiss(toastId)
+
+    if (handleUpgradeRequired(error)) return
+
+    const response = error.response?.data
+    toastService.error(
+      response?.message?.id ||
+      response?.message?.en ||
+      'Failed to apply filters.'
+    )
+  }
 }
 
-async function resetFilters() {
-  filters.date_from = ''
-  filters.date_to = ''
-  filters.account_id = ''
-  filters.strategy_id = ''
-  filters.tag_id = ''
-  await refreshDashboard()
+async function handleResetFilters() {
+  const toastId = toastService.loading('Resetting filters...')
+
+  try {
+    await analyticsStore.getDashboardData()
+    toastService.dismiss(toastId)
+  } catch (error) {
+    toastService.dismiss(toastId)
+
+    if (handleUpgradeRequired(error)) return
+
+    const response = error.response?.data
+    toastService.error(
+      response?.message?.id ||
+      response?.message?.en ||
+      'Failed to reset filters.'
+    )
+  }
 }
 
 async function handleLogout() {
@@ -633,6 +561,14 @@ function formatMonthLabel(value) {
   const [year, month] = value.split('-')
   const date = new Date(Number(year), Number(month) - 1, 1)
   return date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
+}
+
+function formatCategoryLabel(value) {
+  if (!value) return '-'
+
+  return String(value)
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase())
 }
 
 function getBarHeight(netProfit) {
@@ -705,20 +641,5 @@ function performanceBadgeClass(item) {
 
 .progress-bg {
   background: var(--progress-bg);
-}
-
-.filter-input {
-  width: 100%;
-  border-radius: 1rem;
-  border: 1px solid var(--surface-soft-border);
-  background: var(--surface-soft-bg);
-  color: var(--text-body);
-  padding: 0.75rem 1rem;
-  outline: none;
-}
-
-.filter-input:focus {
-  border-color: rgb(34 211 238 / 0.6);
-  box-shadow: 0 0 0 3px rgb(34 211 238 / 0.12);
 }
 </style>
