@@ -45,27 +45,23 @@
               <p class="mt-1">This mode only keeps essential fields.</p>
             </div>
 
-            <!-- PRICE / QTY -->
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
 
-              <BaseInput v-model="form.entry_price" label="Entry Price *" type="number" :error="errors.entry_price" placeholder="1234.56"
-                :disabled="isEdit" />
+              <BaseInput v-model="form.entry_price" label="Entry Price *" type="number" :error="errors.entry_price"
+                placeholder="1234.56" :disabled="isEdit" />
 
-              <!-- EXIT (ONLY WHEN CLOSING) -->
               <BaseInput v-if="isEdit && !isInvestment && closedQuantityNum > 0" v-model="form.exit_price"
                 label="Exit Price" type="number" :error="errors.exit_price" placeholder="1234.56" />
 
-              <!-- QUANTITY -->
               <div class="space-y-2">
                 <BaseInput v-model="form.quantity" label="Quantity *" type="number" :error="errors.quantity"
-                  :disabled="isEdit" placeholder="1234.56" :readonly="isEdit" />
+                  :disabled="isEdit" :readonly="isEdit" placeholder="1234.56" />
 
                 <p v-if="isEdit && !isInvestment" class="field-helper text-xs">
                   Original quantity: {{ displayOriginalQuantity }} (read-only)
                 </p>
               </div>
 
-              <!-- CLOSED QUANTITY -->
               <div v-if="isEdit && !isInvestment && !isClosedTrade" class="space-y-2">
                 <BaseInput v-model="form.closed_quantity" label="Closed Quantity" type="number"
                   :error="errors.closed_quantity" placeholder="1234.56" />
@@ -81,7 +77,8 @@
                 </div>
               </div>
 
-              <BaseInput v-if="!isInvestment" v-model="form.fees" label="Fees" type="number" :error="errors.fees" placeholder="1234.56" />
+              <BaseInput v-if="!isInvestment" v-model="form.fees" label="Fees" type="number" :error="errors.fees"
+                placeholder="1234.56" />
             </div>
 
             <!-- SL / TP / DATE -->
@@ -91,7 +88,7 @@
                 :error="errors.stop_loss" placeholder="1234.56" />
 
               <BaseInput v-if="!isInvestment" v-model="form.take_profit" label="Take Profit" type="number"
-                :error="errors.take_profit" placeholder="1234.56"/>
+                :error="errors.take_profit" placeholder="1234.56" />
 
               <BaseInput v-model="form.entry_date" label="Entry Date *" type="datetime-local" :error="errors.entry_date"
                 :disabled="isEdit" />
@@ -120,7 +117,7 @@
             </div>
 
             <!-- SUMMARY -->
-            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div v-if="!isEdit" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <div class="surface-soft rounded-2xl p-4">
                 <p class="page-subtitle text-sm">Account Equity</p>
                 <p class="page-title mt-2 text-lg font-semibold">
@@ -150,7 +147,7 @@
               </div>
             </div>
 
-            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <div v-if="!isEdit" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               <div class="surface-soft rounded-2xl p-4">
                 <p class="page-subtitle text-sm">Risk Amount</p>
                 <p class="page-title mt-2 text-lg font-semibold">
