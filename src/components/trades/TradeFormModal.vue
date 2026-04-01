@@ -170,11 +170,6 @@
               </div>
             </div>
 
-            <!-- ERROR -->
-            <div v-if="insufficientCash" class="alert-error rounded-2xl px-4 py-3 text-sm">
-              Insufficient balance.
-            </div>
-
             <!-- ACTION -->
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <BaseButton variant="secondary" @click="$emit('close')">
@@ -408,15 +403,6 @@ const rPreviewDisplay = computed(() =>
   Number.isFinite(rPreview.value) ? rPreview.value.toFixed(2) : '0.00'
 )
 
-const insufficientCash = computed(() => {
-  if (!form.account_id) return false
-  if (!accountBalanceInfo.value) return false
-  if (isEdit.value && closedQuantityNum.value > 0) return false
-  if (!isInvestment.value && form.exit_date) return false
-
-  return requiredCash.value > Number(accountBalanceInfo.value?.available_balance || 0)
-})
-
 onMounted(async () => {
   if (!accountStore.items.length) await accountStore.getAll()
   if (!assetStore.items.length) await assetStore.getAll()
@@ -572,11 +558,6 @@ async function handleSubmit() {
 
   if (positionValueExceedsEquity.value) {
     errors.quantity = 'Position value exceeds account equity.'
-  }
-
-  if (insufficientCash.value) {
-    toastService.error('Account cash is insufficient.')
-    return
   }
 
   if (
