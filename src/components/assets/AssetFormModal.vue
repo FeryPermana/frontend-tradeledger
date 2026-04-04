@@ -14,7 +14,7 @@
 
         <div class="overflow-y-auto px-5 py-5 sm:px-6">
           <form class="space-y-4" @submit.prevent="handleSubmit">
-            <BaseInput v-model="form.symbol" label="Symbol" placeholder="BTC" :error="errors.symbol" />
+            <BaseInput v-model="form.symbol" label="Symbol" placeholder="BTCUSDT / BRIS / AAPL" :error="errors.symbol" />
 
             <BaseInput v-model="form.name" label="Name" placeholder="Bitcoin" :error="errors.name" />
 
