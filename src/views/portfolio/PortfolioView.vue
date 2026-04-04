@@ -27,6 +27,24 @@
       </p>
     </div>
 
+    <div v-if="store.summary?.auto_price_sync_enabled" class="alert-info rounded-2xl px-4 py-4 text-sm">
+      <p>
+        Real price will auto-update at
+        <span class="alert-info-strong font-semibold">
+          {{ formatSyncTimes(store.summary.auto_price_sync_times) }}
+        </span>.
+      </p>
+      <p v-if="store.summary?.last_price_sync_at" class="mt-1">
+        Last auto sync:
+        <span class="alert-info-strong font-semibold">
+          {{ formatDateTime(store.summary.last_price_sync_at) }}
+        </span>
+      </p>
+      <p class="mt-1">
+        Commodity is not supported yet. Outside these times, you can still update current price manually.
+      </p>
+    </div>
+
     <div v-if="store.summary" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <div class="surface-card rounded-2xl p-4">
         <p class="page-subtitle text-sm">Total Positions</p>
@@ -51,8 +69,10 @@
 
       <div class="surface-card rounded-2xl p-4">
         <p class="page-subtitle text-sm">Unrealized PnL</p>
-        <p class="mt-2 break-words text-2xl font-bold"
-          :class="Number(store.summary.pnl || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'">
+        <p
+          class="mt-2 break-words text-2xl font-bold"
+          :class="Number(store.summary.pnl || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'"
+        >
           {{ formatMoney(store.summary.pnl, store.summary.display_currency) }}
         </p>
         <p class="page-subtitle mt-2 text-xs">
@@ -77,8 +97,7 @@
       </div>
 
       <div v-if="store.items.length" class="md:hidden">
-        <PortfolioCardList :items="store.items" @edit="editPosition" @delete="deletePosition"
-          @manage="openManageModal" />
+        <PortfolioCardList :items="store.items" @edit="editPosition" @delete="deletePosition" @manage="openManageModal" />
       </div>
 
       <div v-if="!store.items.length" class="surface-soft rounded-2xl p-6 text-center page-subtitle">
@@ -86,19 +105,27 @@
       </div>
     </template>
 
-    <PortfolioFormModal :open="modal" :position="selected" :loading="formLoading" @close="closeModal"
-      @submit="savePosition" />
+    <PortfolioFormModal
+      :open="modal"
+      :position="selected"
+      :loading="formLoading"
+      @close="closeModal"
+      @submit="savePosition"
+    />
 
-    <PortfolioManageModal :open="manageModal" :item="selectedItem" :loading="manageLoading" @close="closeManageModal"
-      @submit="handleManage" />
+    <PortfolioManageModal
+      :open="manageModal"
+      :item="selectedItem"
+      :loading="manageLoading"
+      @close="closeManageModal"
+      @submit="handleManage"
+    />
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
 import { usePortfolioStore } from '@/stores/portfolio.store'
-import { partialClosePortfolio } from '@/api/portfolio.api'
-import { updateAssetPrice } from '@/api/asset.api'
 import PortfolioTable from '@/components/portfolio/PortfolioTable.vue'
 import PortfolioCardList from '@/components/portfolio/PortfolioCardList.vue'
 import PortfolioFormModal from '@/components/portfolio/PortfolioFormModal.vue'
@@ -182,14 +209,14 @@ async function handleManage(payload) {
   const toastId = toastService.loading('Updating position...')
 
   try {
-    if (payload.current_price !== null && selectedItem.value.asset?.id) {
-      await updateAssetPrice(selectedItem.value.asset.id, {
+    if (payload.current_price !== null && payload.current_price !== undefined) {
+      await store.updateCurrentPrice(selectedItem.value.id, {
         current_price: payload.current_price,
       })
     }
 
     if (payload.partial_close) {
-      await partialClosePortfolio(selectedItem.value.id, payload.partial_close)
+      await store.partialClose(selectedItem.value.id, payload.partial_close)
     }
 
     await refreshPortfolio()
@@ -279,6 +306,20 @@ function formatMoney(value, currency = 'IDR') {
     currency,
     maximumFractionDigits: 2,
   }).format(Number(value))
+}
+
+function formatDateTime(value) {
+  if (!value) return '-'
+
+  return new Date(value).toLocaleString('id-ID', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  })
+}
+
+function formatSyncTimes(times) {
+  if (!Array.isArray(times) || !times.length) return '-'
+  return times.join(' & ')
 }
 </script>
 

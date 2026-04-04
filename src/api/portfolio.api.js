@@ -20,6 +20,10 @@ export function updatePortfolioPosition(id, payload) {
   return api.put(`/portfolio-positions/${id}`, payload)
 }
 
+export function updatePortfolioCurrentPrice(id, payload) {
+  return api.patch(`/portfolio-positions/${id}/current-price`, payload)
+}
+
 export function deletePortfolioPosition(id) {
   return api.delete(`/portfolio-positions/${id}`)
 }

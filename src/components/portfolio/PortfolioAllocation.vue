@@ -77,7 +77,8 @@ function formatMoney(value, currency = 'IDR') {
 function formatCategory(value) {
     if (!value) return '-'
     if (value === 'crypto') return 'Crypto'
-    if (value === 'stock') return 'Stock'
+    if (value === 'stock_idx') return 'IDX Stock'
+    if (value === 'stock_us') return 'US Stock'
     if (value === 'commodity') return 'Commodity'
     return value
 }

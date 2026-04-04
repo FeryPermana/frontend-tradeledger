@@ -23,20 +23,18 @@
                             <div class="flex flex-col">
                                 <div class="flex items-center gap-2">
                                     <span class="page-title font-semibold">
-                                        {{ item.asset?.symbol || '-' }}
+                                        {{ item.asset_symbol || '-' }}
                                     </span>
-
-                                    <span v-if="item.asset?.is_watchlist" class="text-yellow-400">★</span>
                                 </div>
 
                                 <span class="page-subtitle">
-                                    {{ item.asset?.name || '-' }}
+                                    {{ item.asset_name || '-' }}
                                 </span>
                             </div>
                         </td>
 
                         <td class="p-4 page-body">
-                            {{ item.account?.name || '-' }}
+                            {{ item.account_name || '-' }}
                         </td>
 
                         <td class="p-4 page-body">
@@ -44,7 +42,7 @@
                         </td>
 
                         <td class="p-4 page-body">
-                            {{ displayMoney(item.avg_price, item.account?.currency || item.display_currency) }}
+                            {{ displayMoney(item.avg_price, item.account_currency || item.display_currency) }}
                         </td>
 
                         <td class="p-4 page-body">
@@ -61,7 +59,7 @@
                         </td>
 
                         <td class="p-4 page-body">
-                            {{ displayMoney(item.total_fees, item.account?.currency || item.display_currency) }}
+                            {{ displayMoney(item.total_fees, item.account_currency || item.display_currency) }}
                         </td>
 
                         <td class="p-4 page-body">

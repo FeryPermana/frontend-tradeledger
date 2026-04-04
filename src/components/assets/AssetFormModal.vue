@@ -74,9 +74,22 @@ import BaseSelect from '@/components/common/BaseSelect.vue'
 import { toastService } from '@/utils/toast'
 
 const ASSET_CATEGORIES = [
-  { value: 'crypto', label: 'Crypto' },
-  { value: 'stock', label: 'Stock' },
-  { value: 'commodity', label: 'Commodity' },
+  {
+    value: 'crypto',
+    label: 'Crypto'
+  },
+  {
+    value: 'stock_idx',
+    label: 'IDX Stock'
+  },
+  {
+    value: 'stock_us',
+    label: 'US Stock'
+  },
+  {
+    value: 'commodity',
+    label: 'Commodity'
+  },
 ]
 
 const props = defineProps({

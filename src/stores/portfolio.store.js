@@ -5,6 +5,7 @@ import {
   fetchPortfolioSummary,
   createPortfolioPosition,
   updatePortfolioPosition,
+  updatePortfolioCurrentPrice,
   deletePortfolioPosition,
   fetchPortfolioAllocation,
   partialClosePortfolio,
@@ -73,7 +74,7 @@ export const usePortfolioStore = defineStore("portfolio", {
 
       try {
         const res = await fetchPortfolioPosition(id);
-        this.detail = res.data?.data ?? null;
+        this.detail = res.data ?? null;
         return res;
       } finally {
         this.loading = false;
@@ -88,7 +89,23 @@ export const usePortfolioStore = defineStore("portfolio", {
       const res = await updatePortfolioPosition(id, payload);
 
       if (this.detail?.id === id) {
-        this.detail = res.data?.data ?? this.detail;
+        this.detail = res.data ?? this.detail;
+      }
+
+      return res;
+    },
+
+    async updateCurrentPrice(id, payload) {
+      const res = await updatePortfolioCurrentPrice(id, payload);
+
+      const updated = res.data ?? null;
+
+      if (updated) {
+        this.items = this.items.map((item) => (item.id === id ? updated : item));
+
+        if (this.detail?.id === id) {
+          this.detail = updated;
+        }
       }
 
       return res;

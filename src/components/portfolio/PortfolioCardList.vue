@@ -5,18 +5,16 @@
                 <div class="min-w-0">
                     <div class="flex flex-wrap items-center gap-2">
                         <p class="page-title text-base font-semibold">
-                            {{ item.asset?.symbol || '-' }}
+                            {{ item.asset_symbol || '-' }}
                         </p>
-
-                        <span v-if="item.asset?.is_watchlist" class="text-yellow-400">★</span>
                     </div>
 
                     <p class="page-subtitle mt-1 break-words text-sm">
-                        {{ item.asset?.name || '-' }}
+                        {{ item.asset_name || '-' }}
                     </p>
 
                     <p class="page-caption mt-1 text-xs">
-                        {{ item.account?.name || '-' }}
+                        {{ item.account_name || '-' }}
                     </p>
 
                     <p class="mt-1 text-xs text-indigo-400">
@@ -41,7 +39,7 @@
                 <div class="surface-soft rounded-xl p-3">
                     <p class="page-subtitle text-sm">Avg Price</p>
                     <p class="page-title mt-1 break-words font-medium">
-                        {{ displayMoney(item.avg_price, item.account?.currency || item.display_currency || 'IDR') }}
+                        {{ displayMoney(item.avg_price, item.account_currency || item.display_currency || 'IDR') }}
                     </p>
                 </div>
 
@@ -62,7 +60,7 @@
                 <div class="surface-soft rounded-xl p-3">
                     <p class="page-subtitle text-sm">Fees</p>
                     <p class="page-title mt-1 break-words font-medium">
-                        {{ displayMoney(item.total_fees, item.account?.currency || item.display_currency) }}
+                        {{ displayMoney(item.total_fees, item.account_currency || item.display_currency) }}
                     </p>
                 </div>
 

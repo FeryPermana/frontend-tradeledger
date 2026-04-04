@@ -71,7 +71,8 @@ defineEmits(['view', 'edit', 'delete', 'toggle-watchlist'])
 function formatCategory(category) {
   if (!category) return '-'
   if (category === 'crypto') return 'Crypto'
-  if (category === 'stock') return 'Stock'
+  if (category === 'stock_idx') return 'IDX Stock'
+  if (category === 'stock_us') return 'US Stock'
   if (category === 'commodity') return 'Commodity'
   return category
 }
@@ -81,7 +82,11 @@ function categoryBadgeClass(category) {
     return 'border-amber-500/30 bg-amber-500/10 text-amber-300'
   }
 
-  if (category === 'stock') {
+  if (category === 'stock_us') {
+    return 'border-indigo-500/30 bg-indigo-500/10 text-indigo-300'
+  }
+
+  if (category === 'stock_idx') {
     return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
   }
 
