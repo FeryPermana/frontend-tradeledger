@@ -116,60 +116,6 @@
                 placeholder="Write your trade note..." :error="errors.notes" />
             </div>
 
-            <!-- SUMMARY -->
-            <div v-if="!isEdit" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              <div class="surface-soft rounded-2xl p-4">
-                <p class="page-subtitle text-sm">Account Equity</p>
-                <p class="page-title mt-2 text-lg font-semibold">
-                  {{ selectedAccountEquityDisplay }}
-                </p>
-              </div>
-
-              <div class="surface-soft rounded-2xl p-4">
-                <p class="page-subtitle text-sm">Available Cash</p>
-                <p class="page-title mt-2 text-lg font-semibold">
-                  {{ availableCashDisplay }}
-                </p>
-              </div>
-
-              <div class="surface-soft rounded-2xl p-4">
-                <p class="page-subtitle text-sm">Required Cash</p>
-                <p class="page-title mt-2 text-lg font-semibold">
-                  {{ requiredCashDisplay }}
-                </p>
-              </div>
-
-              <div class="surface-soft rounded-2xl p-4">
-                <p class="page-subtitle text-sm">Position Value</p>
-                <p class="page-title mt-2 text-lg font-semibold">
-                  {{ positionValueDisplay }}
-                </p>
-              </div>
-            </div>
-
-            <div v-if="!isEdit" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              <div class="surface-soft rounded-2xl p-4">
-                <p class="page-subtitle text-sm">Risk Amount</p>
-                <p class="page-title mt-2 text-lg font-semibold">
-                  {{ riskAmountDisplay }}
-                </p>
-              </div>
-
-              <div class="surface-soft rounded-2xl p-4">
-                <p class="page-subtitle text-sm">PnL Preview</p>
-                <p class="mt-2 text-lg font-semibold" :class="pnlPreview >= 0 ? 'text-green-400' : 'text-red-400'">
-                  {{ pnlPreviewDisplay }}
-                </p>
-              </div>
-
-              <div class="surface-soft rounded-2xl p-4">
-                <p class="page-subtitle text-sm">R Multiple</p>
-                <p class="page-title mt-2 text-lg font-semibold">
-                  {{ rPreviewDisplay }}
-                </p>
-              </div>
-            </div>
-
             <!-- ACTION -->
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <BaseButton variant="secondary" @click="$emit('close')">
@@ -203,7 +149,6 @@ import { useStrategyStore } from '@/stores/strategy.store'
 import { useTagStore } from '@/stores/tag.store'
 import { toastService } from '@/utils/toast'
 import { formatCurrency } from '@/utils/formatters'
-import { fetchAccountAvailableBalance } from '@/api/account.api'
 
 const props = defineProps({
   open: {
@@ -226,7 +171,6 @@ const strategyStore = useStrategyStore()
 const tagStore = useTagStore()
 
 const loading = ref(false)
-const accountBalanceInfo = ref(null)
 
 const isEdit = computed(() => !!props.trade?.id)
 const isInvestment = computed(() => form.position_type === 'investment')
@@ -297,10 +241,6 @@ const strategyOptions = computed(() =>
 
 const selectedAccount = computed(() =>
   accountStore.items.find((item) => String(item.id) === String(form.account_id))
-)
-
-const selectedAccountEquity = computed(() =>
-  Number(selectedAccount.value?.initial_balance || 0)
 )
 
 const selectedAccountCurrency = computed(() =>
@@ -379,10 +319,6 @@ const selectedAccountEquityDisplay = computed(() =>
   formatCurrency(selectedAccountEquity.value, selectedAccountCurrency.value)
 )
 
-const availableCashDisplay = computed(() =>
-  formatCurrency(accountBalanceInfo.value?.available_balance || 0, selectedAccountCurrency.value)
-)
-
 const requiredCashDisplay = computed(() =>
   formatCurrency(requiredCash.value, selectedAccountCurrency.value)
 )
@@ -444,30 +380,6 @@ watch(
       form.tag_ids = []
     }
   }
-)
-
-watch(
-  () => [form.account_id, props.trade?.id],
-  async ([accountId, tradeId]) => {
-    if (!accountId) {
-      accountBalanceInfo.value = null
-      return
-    }
-
-    try {
-      const params = {}
-
-      if (tradeId) {
-        params.exclude_trade_id = tradeId
-      }
-
-      const res = await fetchAccountAvailableBalance(accountId, params)
-      accountBalanceInfo.value = res.data?.data ?? null
-    } catch {
-      accountBalanceInfo.value = null
-    }
-  },
-  { immediate: true }
 )
 
 function resetForm() {
