@@ -1,5 +1,5 @@
 <template>
-  <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+  <div class="grid gap-3 sm:grid-cols-1 xl:grid-cols-5">
     <div class="surface-card rounded-2xl p-4 shadow-xl">
       <p class="page-subtitle text-sm">Total Trades</p>
       <p class="page-title mt-2 text-2xl font-bold">
@@ -19,6 +19,13 @@
       <p class="mt-2 text-2xl font-bold"
         :class="Number(summary.net_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'">
         {{ formatCurrency(summary.net_profit, summary.display_currency) }}
+      </p>
+    </div>
+
+    <div class="surface-card rounded-2xl p-4 shadow-xl">
+      <p class="page-subtitle text-sm">Realized PnL</p>
+      <p class="page-title mt-2 text-2xl font-bold">
+        {{ formatPercent(summary.return_percentage) }}
       </p>
     </div>
 
