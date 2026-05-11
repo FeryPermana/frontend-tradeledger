@@ -70,11 +70,6 @@
                     </div>
                 </div>
 
-                <div v-if="quantityExceeded"
-                    class="rounded-2xl border border-red-700 bg-red-950/40 px-4 py-3 text-sm text-red-300">
-                    Quantity to close exceeds current position.
-                </div>
-
                 <div class="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
                     <BaseButton type="button" variant="secondary" class="w-full sm:w-auto" @click="$emit('close')">
                         Cancel
@@ -136,11 +131,6 @@ const assetLabel = computed(() => {
     const symbol = props.position?.asset?.symbol || '-'
     const name = props.position?.asset?.name || ''
     return name ? `${symbol} - ${name}` : symbol
-})
-
-const quantityExceeded = computed(() => {
-    if (!quantityNum.value) return false
-    return quantityNum.value > currentQtyNum.value
 })
 
 const estimatedProceeds = computed(() => {
@@ -210,10 +200,6 @@ function handleSubmit() {
 
     if (exitFeeNum.value < 0) {
         errors.exit_fee = 'Exit fee cannot be negative.'
-    }
-
-    if (quantityExceeded.value) {
-        errors.quantity = 'Quantity exceeds active position.'
     }
 
     if (
