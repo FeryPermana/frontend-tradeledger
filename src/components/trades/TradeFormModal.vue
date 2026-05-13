@@ -451,10 +451,6 @@ async function handleSubmit() {
   if (!form.quantity) errors.quantity = 'Quantity is required.'
   if (!form.entry_date) errors.entry_date = 'Entry date is required.'
 
-  if (isEdit.value && !isInvestment.value && closedQuantityNum.value > currentRemainingQuantity.value) {
-    errors.closed_quantity = 'Closed quantity cannot be greater than remaining quantity.'
-  }
-
   if (isEdit.value && !isInvestment.value && closedQuantityNum.value > 0) {
     if (!form.exit_price) errors.exit_price = 'Exit price is required when closing a position.'
     if (!form.exit_date) errors.exit_date = 'Exit date is required when closing a position.'

@@ -18,7 +18,7 @@
 
             <BaseInput v-model="form.name" label="Name" placeholder="Bitcoin" :error="errors.name" />
 
-            <BaseInput v-model="form.market" label="Market" placeholder="CRYPTO / STOCK IDX / STOCK US / COMMODITY"
+            <BaseInput v-model="form.market" label="Market" placeholder="CRYPTO / STOCK IDX / STOCK US / COMMODITY / Money Market"
               :error="errors.market" />
 
             <BaseSelect v-model="form.category" label="Category" placeholder="Select category"
@@ -89,6 +89,10 @@ const ASSET_CATEGORIES = [
   {
     value: 'commodity',
     label: 'Commodity'
+  },
+  {
+    value: 'money_market',
+    label: 'Money Market'
   },
 ]
 

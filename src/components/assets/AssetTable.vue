@@ -87,6 +87,7 @@ function formatCategory(category) {
   if (category === 'stock_idx') return 'IDX Stock'
   if (category === 'stock_us') return 'US Stock'
   if (category === 'commodity') return 'Commodity'
+  if (category === 'money_market') return 'Money Market'
   return category
 }
 
