@@ -30,9 +30,9 @@
     </div>
 
     <div class="surface-card rounded-2xl p-4 shadow-xl">
-      <p class="page-subtitle text-sm">Realized PnL</p>
+      <p class="page-subtitle text-sm">Modal</p>
       <p class="page-title mt-2 text-2xl font-bold">
-        {{ formatPercent(summary.total_modal) }}
+        {{ summary.total_modal }}
       </p>
     </div>
 
