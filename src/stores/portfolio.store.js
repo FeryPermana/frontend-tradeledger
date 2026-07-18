@@ -22,7 +22,6 @@ export const usePortfolioStore = defineStore("portfolio", {
       search: "",
       conviction_level: "",
       horizon: "",
-      watchlist_only: false,
     },
   }),
 
@@ -37,7 +36,6 @@ export const usePortfolioStore = defineStore("portfolio", {
         search: "",
         conviction_level: "",
         horizon: "",
-        watchlist_only: false,
       };
     },
 
